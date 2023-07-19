@@ -12,3 +12,5 @@
  
 NOTA: no se analizaron los outliers
 
+PARADIGMA GUADA: MSL con ITI 1.5s - 60 teclas x 25 seg de Rest x 15 bloques. 
+Este experimento se realizó en el Laboratorio. Los sujetos utilizan la Botonera.
