@@ -23,6 +23,11 @@ function [interval12,interval23,interval34,interval45,IKI_trial_norm] = ...
 seq_per_block=size(interval12,2); %columnas
 noBlock=size(interval12,1); %filas
 
+aux12=interval12;
+aux23=interval23;
+aux34=interval34;
+aux45=interval45;
+
 for i=1:noBlock
 
     media12=nanmean(interval12(i,:));
@@ -34,12 +39,14 @@ for i=1:noBlock
     std23=nanstd(interval23(i,:));
     std34=nanstd(interval34(i,:));
     std45=nanstd(interval45(i,:));
-
-    %no uso la funcion zscore porque no contempla NaN's
-    interval12(i,:)=(interval12(i,:)-media12)/std12;
-    interval23(i,:)=(interval23(i,:)-media23)/std23;
-    interval34(i,:)=(interval34(i,:)-media34)/std34;
-    interval45(i,:)=(interval45(i,:)-media45)/std45;  
+    
+    if std12~=0 && std23~=0 && std34~=0 && std45~=0
+        %no uso la funcion zscore porque no contempla NaN's
+        interval12(i,:)=(interval12(i,:)-media12)/std12;
+        interval23(i,:)=(interval23(i,:)-media23)/std23;
+        interval34(i,:)=(interval34(i,:)-media34)/std34;
+        interval45(i,:)=(interval45(i,:)-media45)/std45; 
+    end
 
 end
 
@@ -83,7 +90,33 @@ if strcmp(flag_tipo_norm,'Z')
     IKI_trial_norm=reshape(IKI_trial_norm_Z,seq_per_block,noBlock)';
 else
     % Normalización del IKI_trial con 0-1 (toda la tarea)
-    IKI_trial_norm_01=rescale(IKI_trial);
-    IKI_trial_norm=reshape(IKI_trial_norm_01,seq_per_block,noBlock)';
+    %--------------------OP 1------------------------------
+  IKI_trial_norm_01=rescale(IKI_trial);
+  IKI_trial_norm=reshape(IKI_trial_norm_01,seq_per_block,noBlock)';
+
+  %----------------------OP 2------------------------------
+% aux12=reshape(aux12',1,[]);
+% aux12=rescale(aux12);
+% aux12=reshape(aux12,seq_per_block, noBlock)';
+% 
+% aux23=reshape(aux23',1,[]);
+% aux23=rescale(aux23);
+% aux23=reshape(aux23,seq_per_block, noBlock)';
+% 
+% aux34=reshape(aux34',1,[]);
+% aux34=rescale(aux34);
+% aux34=reshape(aux34,seq_per_block, noBlock)';
+% 
+% aux45=reshape(aux45',1,[]);
+% aux45=rescale(aux45);
+% aux45=reshape(aux45,seq_per_block, noBlock)';
+%     %Utilizo los intervalos normalizados para calcular el IKI
+%     IKI_trial_norm=NaN(noBlock,seq_per_block);
+%     for i=1:noBlock
+%         for j=1:seq_per_block
+%                 IKI_trial_norm(i,j)=nanmean([aux12(i,j) aux23(i,j) aux34(i,j) aux45(i,j)]);
+%         end
+%     end
+    
 end
 

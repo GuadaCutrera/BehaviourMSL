@@ -36,7 +36,9 @@ duration_group=[]; seq_group=[];
 seq_group_num=[];key_group=[];
 
 %Interkey Interval raw and filtered
-iki_group=[]; iki_group_filt=[];
+iki_group=[]; iki_group_corr=[];
+%Interkey Interval visualization raw and filtered
+iki_visual_group=[]; iki_visual_group_corr=[];
 
 %Micro Gains Raw
 mogs_group=[]; mogs_acumulado_group=[];
@@ -44,20 +46,20 @@ mongs_group=[]; mongs_acumulado_group=[];
 TL_acumulado_group=[]; TL_group=[];
 
 % Micro Gains Filtered
-mogs_group_filt=[]; mogs_acumulado_group_filt=[];
-mongs_group_filt=[]; mongs_acumulado_group_filt=[];
-TL_acumulado_group_filt=[]; TL_group_filt=[];
+mogs_group_corr=[]; mogs_acumulado_group_corr=[];
+mongs_group_corr=[]; mongs_acumulado_group_corr=[];
+TL_acumulado_group_corr=[]; TL_group_corr=[];
 
 % Micro Micro Gains Raw
 micro_mogs_group=[]; micro_mogs_acumulado_group=[];
 micro_mongs_group=[]; micro_mongs_acumulado_group=[];
 
 % Micro Micro Gains Filtered
-micro_mogs_group_filt=[]; micro_mogs_acumulado_group_filt=[];
-micro_mongs_group_filt=[]; micro_mongs_acumulado_group_filt=[];
+micro_mogs_group_corr=[]; micro_mogs_acumulado_group_corr=[];
+micro_mongs_group_corr=[]; micro_mongs_acumulado_group_corr=[];
 
 % Interkey_Matrix - Learning curve per trial
-interkey_mat=[]; interkey_mat_filt=[];
+interkey_mat=[]; interkey_mat_corr=[];
 
 %GC 6/1/23
 %Micro Gains Median --> todos estan filtrados
@@ -66,74 +68,124 @@ mediana_MicroMOGS_group=[]; mediana_MicroMONGS_group=[];
 %dará solo NaNs
 mediana_MicroMOGS_acum_group=[]; mediana_MicroMONGS_acum_group=[];
 
+
+    
+
 %% reorganización de matrices
 
-% PARADIGMA GUADA POR TIEMPO
+% PARADIGMA POR TIEMPO
 if strcmp(paradigm_flag,'tiempo')==1
-    %si el bloque corta por tiempo debo reorganizar el vector IKI_TRIAL para llevarlo a IKI_GROUP
     
-    % PARA LA DATA CRUDA
-    %Busco el sujeto que màs secuencias haya hecho midiendo la cantidad de columnas de la matriz IKI_TRIAL_MATRIX
-    max_seq=12;
+    %GC 11/6/2023
+    %Si el paradigma corta por tiempo debo obtener el sujeto con más cantidad de secuencias realizadas para poder analizar todos los
+    %bloques de los sujetos por igual. Esto es porque cada bloque de cada sujeto tiene una cantidad diferente de secuencias. 
+    max_seq=0;
     for i=1:length(SUJETOS)
-        if size(SUJETOS(i).S.seq_results.IKI_trial_matrix,2)>max_seq
-            %si encuentra un sujeto que haya hecho màs secuencias
-            max_seq=size(SUJETOS(i).S.seq_results.IKI_trial_matrix,2);
+        if max(SUJETOS(i).S.seq_results.correct)>max_seq
+            max_seq=max(SUJETOS(i).S.seq_results.correct);
         end
     end
     
-    %completo a las matrices de los otros sujetos con columnas de NaN asì
-    %todos tienen la mismas cantidad de columnas, sabiendo que el bloque
-    %termina en max_seq
+    % Sabiendo que el bloque "general" termina en max_seq, completo los bloques con menos secuencias con NaN. Esto permite que todos los
+    % sujetos (en todos sus bloques) tengan la "misma cantidad de secuencias". 
     
     for i=1:length(SUJETOS)
         %filas= cantidad de bloques
         %columnas= la diferencia entre el màximo y el actual
-        columnas_nan=nan(18,max_seq-size(SUJETOS(i).S.seq_results.IKI_trial_matrix,2));
-        SUJETOS(i).S.seq_results.IKI_trial_matrix=[SUJETOS(i).S.seq_results.IKI_trial_matrix columnas_nan];
-    end
-    
-    %Pongo todas las matrices en 1 fila para poder hacer la comparaciòn
-    %entre sujetos, sabiendo que el bloque termina en max_seq. Ahora en el
-    %medio van a quedar los NaN's. No va a ser un gràfico continuo
-    for i=1:length(SUJETOS)
-        SUJETOS(i).S.seq_results.IKI_trial=reshape(SUJETOS(i).S.seq_results.IKI_trial_matrix',1, []);
-    end
-    
-    clear max_seq; clear columnas_nan;
-    %PARA LA DATA FILTRADA
-    
-    %Busco el sujeto que màs secuencias haya hecho midiendo la cantidad de columnas de la matriz IKI_TRIAL_MATRIX
-    max_seq=12;
-    for i=1:length(SUJETOS)
-        if size(SUJETOS(i).S.seq_results.IKI_trial_matrix_filt,2)>max_seq
-            %si encuentra un sujeto que haya hecho màs secuencias
-            max_seq=size(SUJETOS(i).S.seq_results.IKI_trial_matrix_filt,2);
+        columnas_nan=nan(size(SUJETOS(i).S.seq_results.IKI_per_trial,1),max_seq-size(SUJETOS(i).S.seq_results.IKI_per_trial,2));
+        
+        % IKI_trial
+        SUJETOS(i).S.seq_results.IKI_per_trial=[SUJETOS(i).S.seq_results.IKI_per_trial columnas_nan];
+        
+        %MICRO MICRO OFFLINE
+        SUJETOS(i).S.seq_results.MicroMOGS=[SUJETOS(i).S.seq_results.MicroMOGS columnas_nan];
+        SUJETOS(i).S.seq_results.MicroMogs_acum=[SUJETOS(i).S.seq_results.MicroMogs_acum columnas_nan];
+        
+        
+        %MICRO MICRO ONLINE
+        SUJETOS(i).S.seq_results.MicroMONGS=[SUJETOS(i).S.seq_results.MicroMONGS columnas_nan]; 
+        SUJETOS(i).S.seq_results.MicroMongs_acum=[SUJETOS(i).S.seq_results.MicroMongs_acum columnas_nan];
+        
+        
+        if SUJETOS(i).S.seq_results.flag_norm==1 || SUJETOS(i).S.seq_results.flag_filt==1
+            
+            SUJETOS(i).S.seq_results.IKI_per_trial_corr=[SUJETOS(i).S.seq_results.IKI_per_trial_corr columnas_nan];
+            
+            SUJETOS(i).S.seq_results.MicroMOGS_corr=[SUJETOS(i).S.seq_results.MicroMOGS_corr columnas_nan];
+            SUJETOS(i).S.seq_results.MicroMogs_corr_acum=[SUJETOS(i).S.seq_results.MicroMogs_corr_acum columnas_nan];
+            
+            SUJETOS(i).S.seq_results.MicroMONGS_corr=[SUJETOS(i).S.seq_results.MicroMONGS_corr columnas_nan];
+            SUJETOS(i).S.seq_results.MicroMongs_corr_acum=[SUJETOS(i).S.seq_results.MicroMongs_corr_acum columnas_nan];  
+
         end
+        
     end
     
-    %completo a las matrices de los otros sujetos con columnas de NaN asì
-    %todos tienen la mismas cantidad de columnas, sabiendo que el bloque
-    %termina en max_seq
     
-    for i=1:length(SUJETOS)
-        %filas= cantidad de bloques
-        %columnas= la diferencia entre el màximo y el actual
-        columnas_nan=nan(18,max_seq-size(SUJETOS(i).S.seq_results.IKI_trial_matrix_filt,2));
-        SUJETOS(i).S.seq_results.IKI_trial_matrix_filt=[SUJETOS(i).S.seq_results.IKI_trial_matrix_filt columnas_nan];
-    end
     
-    %Pongo todas las matrices en 1 fila para poder hacer la comparaciòn
-    %entre sujetos, sabiendo que el bloque termina en max_seq. Ahora en el
-    %medio van a quedar los NaN's. No va a ser un gràfico continuo
-    for i=1:length(SUJETOS)
-        SUJETOS(i).S.seq_results.IKI_trial_filt=reshape(SUJETOS(i).S.seq_results.IKI_trial_matrix_filt',1, []);
-    end
+%     %si el bloque corta por tiempo debo reorganizar el vector IKI_TRIAL para llevarlo a IKI_GROUP
+%     
+%     % PARA LA DATA CRUDA
+%     %Busco el sujeto que màs secuencias haya hecho midiendo la cantidad de columnas de la matriz IKI_TRIAL_MATRIX
+%     max_seq=12;
+%     for i=1:length(SUJETOS)
+%         if size(SUJETOS(i).S.seq_results.IKI_per_trial,2)>max_seq
+%             %si encuentra un sujeto que haya hecho màs secuencias
+%             max_seq=size(SUJETOS(i).S.seq_results.IKI_per_trial,2);
+%         end
+%     end
+%     
+%     %completo a las matrices de los otros sujetos con columnas de NaN asì
+%     %todos tienen la mismas cantidad de columnas, sabiendo que el bloque
+%     %termina en max_seq
+%     
+%     for i=1:length(SUJETOS)
+%         %filas= cantidad de bloques
+%         %columnas= la diferencia entre el màximo y el actual
+%         columnas_nan=nan(size(SUJETOS(i).S.seq_results.IKI_per_trial,1),max_seq-size(SUJETOS(i).S.seq_results.IKI_per_trial,2));
+%         SUJETOS(i).S.seq_results.IKI_per_trial=[SUJETOS(i).S.seq_results.IKI_per_trial columnas_nan];
+%     end
+%     
+%     %Pongo todas las matrices en 1 fila para poder hacer la comparaciòn
+%     %entre sujetos, sabiendo que el bloque termina en max_seq. Ahora en el
+%     %medio van a quedar los NaN's. No va a ser un gràfico continuo
+% %     for i=1:length(SUJETOS)
+% %         SUJETOS(i).S.seq_results.IKI_per_trial=reshape(SUJETOS(i).S.seq_results.IKI_per_trial',1, []);
+% %     end
+%     
+%     clear max_seq; clear columnas_nan;
+%     %PARA LA DATA FILTRADA
+%     
+%     %Busco el sujeto que màs secuencias haya hecho midiendo la cantidad de columnas de la matriz IKI_TRIAL_MATRIX
+%     max_seq=12;
+%     for i=1:length(SUJETOS)
+%         if size(SUJETOS(i).S.seq_results.IKI_per_trial_corr,2)>max_seq
+%             %si encuentra un sujeto que haya hecho màs secuencias
+%             max_seq=size(SUJETOS(i).S.seq_results.IKI_per_trial_corr,2);
+%         end
+%     end
+%     
+%     %completo a las matrices de los otros sujetos con columnas de NaN asì
+%     %todos tienen la mismas cantidad de columnas, sabiendo que el bloque
+%     %termina en max_seq
+%     
+%     for i=1:length(SUJETOS)
+%         %filas= cantidad de bloques
+%         %columnas= la diferencia entre el màximo y el actual
+%         columnas_nan=nan(size(SUJETOS(i).S.seq_results.IKI_per_trial_corr,1),max_seq-size(SUJETOS(i).S.seq_results.IKI_per_trial_corr,2));
+%         SUJETOS(i).S.seq_results.IKI_per_trial_corr=[SUJETOS(i).S.seq_results.IKI_per_trial_corr columnas_nan];
+%     end
+%     
+%     %Pongo todas las matrices en 1 fila para poder hacer la comparaciòn
+%     %entre sujetos, sabiendo que el bloque termina en max_seq. Ahora en el
+%     %medio van a quedar los NaN's. No va a ser un gràfico continuo
+% %     for i=1:length(SUJETOS)
+% %         SUJETOS(i).S.seq_results.IKI_per_trial_corr=reshape(SUJETOS(i).S.seq_results.IKI_per_trial_corr',1, []);
+% %     end
 end
 
 % Matriz IKI_per_trial y a los micro micro - la pongo en una fila para poder graficarla. Los vector es de noBlock x noSeq
 for i=1:length(SUJETOS)
-    SUJETOS(i).S.seq_results.IKI_per_trial_filt=reshape(SUJETOS(i).S.seq_results.IKI_per_trial_filt',1,[]);
     SUJETOS(i).S.seq_results.IKI_per_trial=reshape(SUJETOS(i).S.seq_results.IKI_per_trial',1,[]);
     
     SUJETOS(i).S.seq_results.MicroMOGS=reshape(SUJETOS(i).S.seq_results.MicroMOGS',1,[]);
@@ -142,11 +194,20 @@ for i=1:length(SUJETOS)
     SUJETOS(i).S.seq_results.MicroMogs_acum=reshape(SUJETOS(i).S.seq_results.MicroMogs_acum',1,[]);
     SUJETOS(i).S.seq_results.MicroMongs_acum=reshape(SUJETOS(i).S.seq_results.MicroMongs_acum',1,[]);
     
-    SUJETOS(i).S.seq_results.MicroMOGS_filt=reshape(SUJETOS(i).S.seq_results.MicroMOGS_filt',1,[]);
-    SUJETOS(i).S.seq_results.MicroMONGS_filt=reshape(SUJETOS(i).S.seq_results.MicroMONGS_filt',1,[]);
+    %GC 11/6/2203
+    if SUJETOS(i).S.seq_results.flag_norm==1 || SUJETOS(i).S.seq_results.flag_filt==1
+       
+        SUJETOS(i).S.seq_results.IKI_per_trial_corr=reshape(SUJETOS(i).S.seq_results.IKI_per_trial_corr',1,[]);
+        
+        SUJETOS(i).S.seq_results.MicroMOGS_corr=reshape(SUJETOS(i).S.seq_results.MicroMOGS_corr',1,[]);
+        SUJETOS(i).S.seq_results.MicroMONGS_corr=reshape(SUJETOS(i).S.seq_results.MicroMONGS_corr',1,[]);
+
+        SUJETOS(i).S.seq_results.MicroMogs_corr_acum=reshape(SUJETOS(i).S.seq_results.MicroMogs_corr_acum',1,[]);
+        SUJETOS(i).S.seq_results.MicroMongs_corr_acum=reshape(SUJETOS(i).S.seq_results.MicroMongs_corr_acum',1,[]);
+        
+    end
+
     
-    SUJETOS(i).S.seq_results.MicroMogs_filt_acum=reshape(SUJETOS(i).S.seq_results.MicroMogs_filt_acum',1,[]);
-    SUJETOS(i).S.seq_results.MicroMongs_filt_acum=reshape(SUJETOS(i).S.seq_results.MicroMongs_filt_acum',1,[]);
 end
 
 %% Sin Normalizar
@@ -157,7 +218,7 @@ end
     key_group=[key_group;SUJETOS(i).S.seq_results.Intervalmean];
     
     iki_group=[iki_group;SUJETOS(i).S.seq_results.IKI_per_trial];
-    iki_group_filt=[iki_group_filt;SUJETOS(i).S.seq_results.IKI_per_trial_filt];
+    iki_visual_group=[iki_visual_group;SUJETOS(i).S.seq_results.IKI_visual];
     
     mogs_group=[mogs_group;SUJETOS(i).S.seq_results.MOGS'];
     mogs_acumulado_group=[mogs_acumulado_group;SUJETOS(i).S.seq_results.MOGS_acumulativo'];
@@ -166,31 +227,42 @@ end
     TL_group=[TL_group;SUJETOS(i).S.seq_results.Total_Learning];
     TL_acumulado_group=[TL_acumulado_group;SUJETOS(i).S.seq_results.Total_Learning_acumulativo];
     
-    mogs_group_filt=[mogs_group_filt;SUJETOS(i).S.seq_results.MOGS_filt'];
-    mogs_acumulado_group_filt=[mogs_acumulado_group_filt;SUJETOS(i).S.seq_results.MOGS_acumulativo_filt'];
-    mongs_group_filt=[mongs_group_filt;SUJETOS(i).S.seq_results.MONGS_filt];
-    mongs_acumulado_group_filt=[mongs_acumulado_group_filt;SUJETOS(i).S.seq_results.MONGS_acumulativo_filt];
-    TL_group_filt=[TL_group_filt;SUJETOS(i).S.seq_results.Total_Learning_filt];
-    TL_acumulado_group_filt=[TL_acumulado_group_filt;SUJETOS(i).S.seq_results.Total_Learning_acumulativo_filt];
     
     micro_mogs_group=[micro_mogs_group;SUJETOS(i).S.seq_results.MicroMOGS];
     micro_mongs_group=[micro_mongs_group;SUJETOS(i).S.seq_results.MicroMONGS];
     micro_mogs_acumulado_group=[micro_mogs_acumulado_group;SUJETOS(i).S.seq_results.MicroMogs_acum];
     micro_mongs_acumulado_group=[micro_mongs_acumulado_group;SUJETOS(i).S.seq_results.MicroMongs_acum];
 
-    micro_mogs_group_filt=[micro_mogs_group_filt;SUJETOS(i).S.seq_results.MicroMOGS_filt];
-    micro_mongs_group_filt=[micro_mongs_group_filt;SUJETOS(i).S.seq_results.MicroMONGS_filt];
-    micro_mogs_acumulado_group_filt=[micro_mogs_acumulado_group_filt;SUJETOS(i).S.seq_results.MicroMogs_filt_acum];
-    micro_mongs_acumulado_group_filt=[micro_mongs_acumulado_group_filt;SUJETOS(i).S.seq_results.MicroMongs_filt_acum];
-
-    interkey_mat=[interkey_mat;SUJETOS(i).S.seq_results.interkey_matrix];
-    interkey_mat_filt=[interkey_mat_filt;SUJETOS(i).S.seq_results.interkey_matrix_filt];
+%     interkey_mat=[interkey_mat;SUJETOS(i).S.seq_results.interkey_matrix];
+% 
+%     if SUJETOS(i).S.seq_results.flag_filt==1
+%         interkey_mat_corr=[interkey_mat_corr;SUJETOS(i).S.seq_results.interkey_matrix_corr];
+%     end
     
     %GC 6/1/23
     mediana_MicroMOGS_group=[mediana_MicroMOGS_group;SUJETOS(i).S.seq_results.mediana_MicroMogs];
     mediana_MicroMONGS_group=[mediana_MicroMONGS_group;SUJETOS(i).S.seq_results.mediana_MicroMongs];
     mediana_MicroMOGS_acum_group=[mediana_MicroMOGS_acum_group;SUJETOS(i).S.seq_results.mediana_MicroMogs_acum];
     mediana_MicroMONGS_acum_group=[mediana_MicroMONGS_acum_group;SUJETOS(i).S.seq_results.mediana_MicroMongs_acum];
+    
+    if SUJETOS(i).S.seq_results.flag_norm==1 || SUJETOS(i).S.seq_results.flag_filt==1
+        %GC 11/6/2023
+        iki_group_corr=[iki_group_corr;SUJETOS(i).S.seq_results.IKI_per_trial_corr];
+        iki_visual_group_corr=[iki_visual_group_corr;SUJETOS(i).S.seq_results.IKI_visual_corr];
+            
+        mogs_group_corr=[mogs_group_corr;SUJETOS(i).S.seq_results.MOGS_corr'];
+        mogs_acumulado_group_corr=[mogs_acumulado_group_corr;SUJETOS(i).S.seq_results.MOGS_acumulativo_corr'];
+        mongs_group_corr=[mongs_group_corr;SUJETOS(i).S.seq_results.MONGS_corr];
+        mongs_acumulado_group_corr=[mongs_acumulado_group_corr;SUJETOS(i).S.seq_results.MONGS_acumulativo_corr];
+        TL_group_corr=[TL_group_corr;SUJETOS(i).S.seq_results.Total_Learning_corr];
+        TL_acumulado_group_corr=[TL_acumulado_group_corr;SUJETOS(i).S.seq_results.Total_Learning_acumulativo_corr];
+    
+        micro_mogs_group_corr=[micro_mogs_group_corr;SUJETOS(i).S.seq_results.MicroMOGS_corr];
+        micro_mongs_group_corr=[micro_mongs_group_corr;SUJETOS(i).S.seq_results.MicroMONGS_corr];
+        micro_mogs_acumulado_group_corr=[micro_mogs_acumulado_group_corr;SUJETOS(i).S.seq_results.MicroMogs_corr_acum];
+        micro_mongs_acumulado_group_corr=[micro_mongs_acumulado_group_corr;SUJETOS(i).S.seq_results.MicroMongs_corr_acum];
+        
+    end
 
 
  end
@@ -202,7 +274,7 @@ Group_Parameters.seq_group_num=seq_group_num;
 Group_Parameters.key_group=key_group;
 
 Group_Parameters.iki_group=iki_group;
-Group_Parameters.iki_group_filt=iki_group_filt;
+Group_Parameters.iki_visual_group=iki_visual_group;
 
 Group_Parameters.mogs_group=mogs_group;
 Group_Parameters.mogs_acumulado_group=mogs_acumulado_group;
@@ -211,25 +283,38 @@ Group_Parameters.mongs_acumulado_group=mongs_acumulado_group;
 Group_Parameters.TL_group=TL_group;
 Group_Parameters.TL_acumulado_group=TL_acumulado_group;
 
-Group_Parameters.mogs_group_filt=mogs_group_filt;
-Group_Parameters.mogs_acumulado_group_filt=mogs_acumulado_group_filt;
-Group_Parameters.mongs_group_filt=mongs_group_filt;
-Group_Parameters.mongs_acumulado_group_filt=mongs_acumulado_group_filt;
-Group_Parameters.TL_group_filt=TL_group_filt;
-Group_Parameters.TL_acumulado_group_filt=TL_acumulado_group_filt;
 
 Group_Parameters.micro_mogs_group=micro_mogs_group;
 Group_Parameters.micro_mogs_acumulado_group=micro_mogs_acumulado_group;
 Group_Parameters.micro_mongs_group=micro_mongs_group;
 Group_Parameters.micro_mongs_acumulado_group=micro_mongs_acumulado_group;
 
-Group_Parameters.micro_mogs_group_filt=micro_mogs_group_filt;
-Group_Parameters.micro_mogs_acumulado_group_filt=micro_mogs_acumulado_group_filt;
-Group_Parameters.micro_mongs_group_filt=micro_mongs_group_filt;
-Group_Parameters.micro_mongs_acumulado_group_filt=micro_mongs_acumulado_group_filt;
+
+
+%GC 11/6/2023
+if SUJETOS(i).S.seq_results.flag_norm==1 || SUJETOS(i).S.seq_results.flag_filt==1
+    
+    Group_Parameters.iki_group_corr=iki_group_corr;
+    Group_Parameters.iki_visual_group_corr=iki_visual_group_corr;
+
+    Group_Parameters.mogs_group_corr=mogs_group_corr;
+    Group_Parameters.mogs_acumulado_group_corr=mogs_acumulado_group_corr;
+    Group_Parameters.mongs_group_corr=mongs_group_corr;
+    Group_Parameters.mongs_acumulado_group_corr=mongs_acumulado_group_corr;
+    Group_Parameters.TL_group_corr=TL_group_corr;
+    Group_Parameters.TL_acumulado_group_corr=TL_acumulado_group_corr;
+
+    Group_Parameters.micro_mogs_group_corr=micro_mogs_group_corr;
+    Group_Parameters.micro_mogs_acumulado_group_corr=micro_mogs_acumulado_group_corr;
+    Group_Parameters.micro_mongs_group_corr=micro_mongs_group_corr;
+    Group_Parameters.micro_mongs_acumulado_group_corr=micro_mongs_acumulado_group_corr;
+end
+
  
 Group_Parameters.interkey_mat=interkey_mat;
-Group_Parameters.interkey_mat_filt=interkey_mat_filt;
+if SUJETOS(1).S.seq_results.flag_filt==1
+    Group_Parameters.interkey_mat_corr=interkey_mat_corr;
+end
 
 %GC 6/1/23
 Group_Parameters.mediana_MicroMOGS_group=mediana_MicroMOGS_group;
@@ -238,26 +323,46 @@ Group_Parameters.mediana_MicroMOGS_acum_group=mediana_MicroMOGS_acum_group;
 Group_Parameters.mediana_MicroMONGS_acum_group=mediana_MicroMONGS_acum_group;
 
 %GC 18/1/23
-if SUJETOS(1).S.seq_results.flag_norm==0 %grupo solo filtrado
+if SUJETOS(1).S.seq_results.flag_norm==0 %grupo no normalizado
     Group_Parameters.flag_norm=0;
-else %grupo filtrado y normalizado
+    Group_Parameters.titulo_norm='sin norm';
+else %grupo normalizado
     Group_Parameters.flag_norm=1;
     Group_Parameters.flag_tipo_norm=SUJETOS(1).S.seq_results.flag_tipo_norm;
+    Group_Parameters.titulo_norm=SUJETOS(1).S.seq_results.flag_tipo_norm;
 end
+%GC 20/5/2023
+if SUJETOS(1).S.seq_results.flag_filt==0 %grupo no filtrado
+    Group_Parameters.flag_filt=0;
+    Group_Parameters.titulo_filt='sin filt';
+else %grupo filtrado
+    Group_Parameters.flag_filt=1;
+    Group_Parameters.titulo_filt='filt';
+end
+Group_Parameters.titulo_analisis=[Group_Parameters.titulo_filt ' - ' Group_Parameters.titulo_norm];
+
+if strcmp(paradigm_flag,'tiempo')==1
+    %11/6/2023
+    Group_Parameters.cant_SeqBlock=max_seq;
+else
+    Group_Parameters.cant_SeqBlock=SUJETOS(1).S.seq_results.cant_SeqBlock;
+end
+
+
 
 %% clear workspace
 clear duration_group; clear seq_group; clear key_group; clear seq_group_num;
-clear iki_group; clear iki_group_filt;
+clear iki_group; clear iki_group_corr;
 
 clear mogs_group; clear mogs_acumulado_group; clear mongs_acumulado_group; clear mongs_group;
 clear TL_group; clear TL_acumulado_group;
 
-clear mogs_group_filt; clear mogs_acumulado_group_filt; clear mongs_acumulado_group_filt; clear mongs_group_filt;
-clear TL_group_filt; clear TL_acumulado_group_filt;
+clear mogs_group_corr; clear mogs_acumulado_group_corr; clear mongs_acumulado_group_corr; clear mongs_group_corr;
+clear TL_group_corr; clear TL_acumulado_group_corr;
 
 clear micro_mogs_group; clear micro_mogs_acumulado_group; clear micro_mongs_acumulado_group; clear micro_mongs_group;
 
-clear micro_mogs_group_filt; clear micro_mogs_acumulado_group_filt; clear micro_mongs_acumulado_group_filt; clear micro_mongs_group_filt;
+clear micro_mogs_group_corr; clear micro_mogs_acumulado_group_corr; clear micro_mongs_acumulado_group_corr; clear micro_mongs_group_corr;
 
 %GC 6/1/23
 clear mediana_MicroMOGS_group; clear mediana_MicroMONGS_group; clear mediana_MicroMOGS_acum_group; clear mediana_MicroMONGS_acum_group; 
@@ -273,5 +378,6 @@ end
 
 %GC 18/1/23
 Group_Results.flag_norm=Group_Parameters.flag_norm;
+Group_Results.flag_filt=Group_Parameters.flag_filt;
 
 save([path 'Group_Results.mat'],'Group_Results');

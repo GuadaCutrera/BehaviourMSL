@@ -1,4 +1,19 @@
-function seq_results=Plot_Individual_Figures(seq_results,path,fname,flag_norm)
+function seq_results=Plot_Individual_Figures(seq_results,path,fname)
+
+%En caso de que la data sea corregida por filtrado o normalización
+% GC 20/5/2023
+if seq_results(1,1).flag_norm==0
+    titulo_norm='sin norm';
+else
+    titulo_norm=seq_results(1,1).flag_tipo_norm;
+end
+if seq_results(1,1).flag_filt ==1
+    titulo_filt='filt';
+else
+    titulo_filt='sin filt';
+end
+titulo=[titulo_filt ' - ' titulo_norm];
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                                                     %%%
 %%%                             FIGURE 1:                               %%%
@@ -65,13 +80,15 @@ saveas(gcf,[path fname(1:end-4) '_CorrectSeq_Duration.' 'png']);
 figure(2); set(gcf,'Color','white'); box OFF; hold on;
 
 %% Datos crudos
-subplot(2,1,1)
+if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt ==1 %si se corrigieron datos -> en la figura hay dos img
+    subplot(2,1,1)
+end
 IKI_trial=reshape(seq_results(1,1).IKI_per_trial',1, []);
 %noTrials=length(IKI_trial); %Number of trials: 12 seq x 15 block = 180 trials
 plot(IKI_trial);
 hold on
 
-for i=1:12:length(IKI_trial)
+for i=1:max(seq_results.cant_SeqBlock):length(IKI_trial)
     xline(i); %indicates a new block 
 end
 
@@ -82,36 +99,36 @@ ylim([0 (max([seq_results.Interval12, seq_results.Interval23, ...
 xlim([0 length(IKI_trial)]);
 title('Curva de Learning - Datos crudos')
 
-%% datos filtrados
-subplot(2,1,2)
-IKI_trial_filt=reshape(seq_results(1,1).IKI_per_trial_filt',1, []);
-plot(IKI_trial_filt);
-hold on
+%% datos corregidos
+if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt ==1
+    subplot(2,1,2)
+    IKI_trial_corr=reshape(seq_results(1,1).IKI_per_trial_corr',1, []);
+    plot(IKI_trial_corr);
+    hold on
 
-for i=1:12:length(IKI_trial_filt)
-    xline(i);
-end
-
-xlabel('Trials','FontName','Arial','FontSize',12)
-ylabel('Interkeys interval','FontName','Arial','FontSize',12);
-if flag_norm==0
-    %le dejo el mismo limite superior que en el no filtrado para conservar la
-    %escala del gràfico
-    ylim([0 (max([seq_results.Interval12, seq_results.Interval23, ...
-                  seq_results.Interval34, seq_results.Interval45]))])
-    norm_titulo='sin norm';
-else
-    if  strcmp(seq_results(1,1).flag_tipo_norm,'Z')
-        ylim([-5 5])
-        yline(0)
-    else
-        ylim([0 1]) 
+    for i=1:max(seq_results.cant_SeqBlock):length(IKI_trial_corr)
+        xline(i);
     end
-    norm_titulo=seq_results(1,1).flag_tipo_norm;
-end
-xlim([0 length(IKI_trial_filt)]);
-title(['Curva de Learning - Datos filtrados - ' norm_titulo])
 
+    xlabel('Trials','FontName','Arial','FontSize',12)
+    ylabel('Interkeys interval','FontName','Arial','FontSize',12);
+    if seq_results(1,1).flag_norm==0
+        %le dejo el mismo limite superior que en el no filtrado para conservar la
+        %escala del gràfico
+        ylim([0 (max([seq_results.Interval12, seq_results.Interval23, ...
+                      seq_results.Interval34, seq_results.Interval45]))])
+     else
+        if  strcmp(seq_results(1,1).flag_tipo_norm,'Z')
+            ylim([-5 5])
+            yline(0)
+        else
+            ylim([0 1]) 
+        end
+        
+    end
+    xlim([0 length(IKI_trial_corr)]);
+    title(['Curva de Learning - ' titulo])
+end %end if datos corregidos
 %% save
 saveas(gcf,[path fname(1:end-4) '_CurvaLearning.' 'fig']);
 saveas(gcf,[path fname(1:end-4) '_CurvaLearning.' 'png']);
@@ -200,109 +217,110 @@ saveas(gcf,[path fname(1:end-4) '_MicroGains.' 'png']);
 %%%                                                                     %%%
 %%%               Plots Micro Gains as filtered data.                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-figure(4); set(gcf,'Color','white'); box OFF; hold on;
+if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt ==1
+    figure(4); set(gcf,'Color','white'); box OFF; hold on; sgtitle(['Micro Gains - ' titulo])
 
-%% MOGS acumulado
-subplot(2,3,3)
-seq_results.MOGS_acumulativo_filt=cumsum(seq_results.MOGS_filt,'omitnan');
-plot(seq_results.MOGS_acumulativo_filt,'r.');
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('MOGs-filt','FontName','Arial','FontSize',12);
-if flag_norm==0
-    ylim([-1.5 1.5])
-else
-    if strcmp(seq_results(1,1).flag_tipo_norm,'Z')
-        ylim([-12 12])
+    %% MOGS acumulado
+    subplot(2,3,3)
+    seq_results.MOGS_acumulativo_corr=cumsum(seq_results.MOGS_corr,'omitnan');
+    plot(seq_results.MOGS_acumulativo_corr,'r.');
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('MOGs - corr','FontName','Arial','FontSize',12);
+    if seq_results(1,1).flag_norm==0
+        ylim([-1.5 1.5])
+    else
+        if strcmp(seq_results(1,1).flag_tipo_norm,'Z')
+            ylim([-12 12])
+        else
+            ylim([-5 5])
+        end
+    end
+    xlim([0 length(seq_results.MOGS_acumulativo)]);
+    yline(0)
+
+
+    %% MONGS acumulado
+    subplot(2,3,2)
+    seq_results.MONGS_acumulativo_corr=cumsum(seq_results.MONGS_corr,'omitnan');
+    plot(seq_results.MONGS_acumulativo_corr,'b.');
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('MONGs - corr','FontName','Arial','FontSize',12);
+    if seq_results(1,1).flag_norm==0
+        ylim([-1.5 1.5])
+    else
+        if strcmp(seq_results(1,1).flag_tipo_norm,'Z')
+            ylim([-12 12])
+        else
+            ylim([-5 5])
+        end
+    end
+    xlim([0 length(seq_results.MONGS_acumulativo)]);
+    yline(0)
+
+    %% TOTAL LEARNING
+    subplot(2,3,1)
+    seq_results.Total_Learning_acumulativo_corr=cumsum(seq_results.Total_Learning_corr,'omitnan');
+    plot(seq_results.Total_Learning_acumulativo_corr,'k.');
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('Total Learning - corr','FontName','Arial','FontSize',12);
+    if seq_results(1,1).flag_norm==0
+        ylim([-1.5 1.5])
+    else
+        if strcmp(seq_results(1,1).flag_tipo_norm,'Z')
+            ylim([-12 12])
+        else
+            ylim([-5 5])
+        end
+    end
+    xlim([0 length(seq_results.Total_Learning_acumulativo)]);
+    title('Acumulado')
+    yline(0)
+
+    %% MOGS no acumulado
+    subplot(2,3,6)
+    plot(seq_results.MOGS_corr,'r.');
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('MOGs - corr','FontName','Arial','FontSize',12);
+    if seq_results(1,1).flag_norm==0
+        ylim([-0.5 0.5])
     else
         ylim([-5 5])
     end
-end
-xlim([0 length(seq_results.MOGS_acumulativo)]);
-yline(0)
+    xlim([0 length(seq_results.MOGS)]);
+    yline(0)
 
-
-%% MONGS acumulado
-subplot(2,3,2)
-seq_results.MONGS_acumulativo_filt=cumsum(seq_results.MONGS_filt,'omitnan');
-plot(seq_results.MONGS_acumulativo_filt,'b.');
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('MONGs-filt','FontName','Arial','FontSize',12);
-if flag_norm==0
-    ylim([-1.5 1.5])
-else
-    if strcmp(seq_results(1,1).flag_tipo_norm,'Z')
-        ylim([-12 12])
+    %% MONGS no acumulado
+    subplot(2,3,5)
+    plot(seq_results.MONGS_corr,'b.');
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('MONGs - corr','FontName','Arial','FontSize',12);
+    if seq_results(1,1).flag_norm==0
+        ylim([-0.5 0.5])
     else
         ylim([-5 5])
     end
-end
-xlim([0 length(seq_results.MONGS_acumulativo)]);
-yline(0)
+    xlim([0 length(seq_results.MONGS)]);
+    yline(0)
 
-%% TOTAL LEARNING
-subplot(2,3,1)
-seq_results.Total_Learning_acumulativo_filt=cumsum(seq_results.Total_Learning_filt,'omitnan');
-plot(seq_results.Total_Learning_acumulativo_filt,'k.');
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('Total Learning - filt','FontName','Arial','FontSize',12);
-if flag_norm==0
-    ylim([-1.5 1.5])
-else
-    if strcmp(seq_results(1,1).flag_tipo_norm,'Z')
-        ylim([-12 12])
+    %% TOTAL LEARNING
+    subplot(2,3,4)
+    plot(seq_results.Total_Learning_corr,'k.');
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('Total Learning - corr','FontName','Arial','FontSize',12);
+    if seq_results(1,1).flag_norm==0
+        ylim([-0.5 0.5])
     else
         ylim([-5 5])
     end
-end
-xlim([0 length(seq_results.Total_Learning_acumulativo)]);
-title('Acumulado')
-yline(0)
+    xlim([0 length(seq_results.Total_Learning)]);
+    title('No acumulado')
+    yline(0)
 
-%% MOGS no acumulado
-subplot(2,3,6)
-plot(seq_results.MOGS_filt,'r.');
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('MOGs-filt','FontName','Arial','FontSize',12);
-if flag_norm==0
-    ylim([-0.5 0.5])
-else
-    ylim([-5 5])
-end
-xlim([0 length(seq_results.MOGS)]);
-yline(0)
+    %% Save figure: .fig and .png
 
-%% MONGS no acumulado
-subplot(2,3,5)
-plot(seq_results.MONGS_filt,'b.');
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('MONGs-filt','FontName','Arial','FontSize',12);
-if flag_norm==0
-    ylim([-0.5 0.5])
-else
-    ylim([-5 5])
-end
-xlim([0 length(seq_results.MONGS)]);
-yline(0)
-
-%% TOTAL LEARNING
-subplot(2,3,4)
-plot(seq_results.Total_Learning_filt,'k.');
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('Total Learning - filt','FontName','Arial','FontSize',12);
-if flag_norm==0
-    ylim([-0.5 0.5])
-else
-    ylim([-5 5])
-end
-xlim([0 length(seq_results.Total_Learning)]);
-title('No acumulado')
-yline(0)
-
-%% Save figure: .fig and .png
-
-saveas(gcf,[path fname(1:end-4) '_MicroGains_filt.' 'fig']);
-saveas(gcf,[path fname(1:end-4) '_MicroGains_filt.' 'png']);
-
+    saveas(gcf,[path fname(1:end-4) '_MicroGains_corr.' 'fig']);
+    saveas(gcf,[path fname(1:end-4) '_MicroGains_corr.' 'png']);
+end % end if data_corr
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                            FIGURE 5                                 %%%
@@ -316,22 +334,19 @@ saveas(gcf,[path fname(1:end-4) '_MicroGains_filt.' 'png']);
 figure(5); set(gcf,'Color','white'); box OFF; hold on;
 
 % MICRO MICRO No acumulativo
-aux_mogs=[];
-aux_mongs=[];
-
 aux_mogs=reshape(seq_results.MicroMOGS',1, []);
 aux_mongs=reshape(seq_results.MicroMONGS',1, []);
 
 % MicroMogs
 subplot(2,2,1)
 plot(aux_mogs,'r.')
-for i=1:11:length(aux_mogs)
+for i=1:(max(seq_results.cant_SeqBlock)-1):length(aux_mogs)
     xline(i)
 end
 yline(0)
 %ylim([min(aux_mogs) max(aux_mogs)])
 ylim([-1 1])
-xlim([0 length(aux_mogs)])
+%xlim([0 length(aux_mogs)])
 title('No Acum. Crudo')
 ylabel('Micro MOGS')
 
@@ -339,7 +354,7 @@ ylabel('Micro MOGS')
 % MicroMongs
 subplot(2,2,2)
 plot(aux_mongs,'b.')
-for i=1:12:length(aux_mongs)
+for i=1:max(seq_results.cant_SeqBlock):length(aux_mongs)
     xline(i)
 end
 yline(0)
@@ -355,21 +370,21 @@ ylabel('Micro MONGS')
 subplot(2,2,3)
 for i=1:size(seq_results.MicroMOGS,1)
      seq_results(1,1).MicroMogs_acum(i,:)=cumsum(seq_results(1,1).MicroMOGS(i,:),'omitnan');
-     plot(((i-1)*11+1):((i-1)*11+1+10),seq_results(1,1).MicroMogs_acum(i,:),'r.');
-     xline((i-1)*11+1); hold on; %la línea indica el comienzo del bloque
+     plot(((i-1)*(seq_results.cant_SeqBlock-1)+1):((i-1)*(seq_results.cant_SeqBlock-1)+1+(seq_results.cant_SeqBlock-2)),seq_results(1,1).MicroMogs_acum(i,:),'r.');
+     xline((i-1)*(seq_results.cant_SeqBlock-1)+1); hold on; %la línea indica el comienzo del bloque
 end
 title('MICRO MOGS ACUM')
 %ylim([min(seq_results(1,1).MicroMogs_acum,[],'all') max(seq_results(1,1).MicroMogs_acum,[],'all')])
 ylim([-3 3])
-xlim([0 length(aux_mogs)])
+%xlim([0 length(aux_mogs)])
 yline(0)
 
 % MicroMongs
 subplot(2,2,4)
 for i=1:size(seq_results.MicroMONGS,1)
      seq_results(1,1).MicroMongs_acum(i,:)=cumsum(seq_results(1,1).MicroMONGS(i,:),'omitnan');
-     plot(((i-1)*12+1):((i-1)*12+1+11),seq_results(1,1).MicroMongs_acum(i,:),'b.');
-     xline((i-1)*12+1); hold on; %la línea indica el comienzo del bloque
+     plot(((i-1)*seq_results.cant_SeqBlock+1):((i-1)*seq_results.cant_SeqBlock+1+(seq_results.cant_SeqBlock-1)),seq_results(1,1).MicroMongs_acum(i,:),'b.');
+     xline((i-1)*seq_results.cant_SeqBlock+1); hold on; %la línea indica el comienzo del bloque
 end
 title('MICRO MONGS ACUM')
 %ylim([min(seq_results(1,1).MicroMongs_acum,[],'all') max(seq_results(1,1).MicroMongs_acum,[],'all')])
@@ -385,103 +400,101 @@ saveas(gcf,[path fname(1:end-4) '_MicroMicroGains_crudo.' 'png']);
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                            FIGURE 6                                 %%%
-%%%             Micro Micro Gains as Filtered data                      %%%
+%%%             Micro Micro Gains as Filtered and/or Normalized data    %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-figure(6); set(gcf,'Color','white'); box OFF; hold on;
+if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt ==1
+    figure(6); set(gcf,'Color','white'); box OFF; hold on; sgtitle(['Micro Micro Gains - ' titulo]);
 
-% MICRO MICRO No acumulativo
-aux_mogs=[];
-aux_mongs=[];
+    % MICRO MICRO No acumulativo
+    aux_mogs=reshape(seq_results.MicroMOGS_corr',1, []);
+    aux_mongs=reshape(seq_results.MicroMONGS_corr',1, []);
 
-aux_mogs=reshape(seq_results.MicroMOGS_filt',1, []);
-aux_mongs=reshape(seq_results.MicroMONGS_filt',1, []);
+    % MicroMogs
+    subplot(2,2,1)
+    plot(aux_mogs,'r.')
+    for i=1:(max(seq_results.cant_SeqBlock)-1):length(aux_mogs)
+        xline(i)
+    end
+    yline(0)
+    %ylim([min(aux_mogs) max(aux_mogs)])
+    if seq_results(1,1).flag_norm==0
+        ylim([-1.5 1.5])
+    else
+        ylim([-15 15])
+    end
+    %xlim([0 length(aux_mogs)])
+    title('No Acum. corr')
+    ylabel('Micro MOGS')
 
-% MicroMogs
-subplot(2,2,1)
-plot(aux_mogs,'r.')
-for i=1:11:length(aux_mogs)
-    xline(i)
-end
-yline(0)
-%ylim([min(aux_mogs) max(aux_mogs)])
-if flag_norm==0
-    ylim([-1.5 1.5])
-else
-    ylim([-15 15])
-end
-xlim([0 length(aux_mogs)])
-title('No Acum. filt')
-ylabel('Micro MOGS')
+    % MicroMongs
+    subplot(2,2,2)
+    plot(aux_mongs,'b.')
+    for i=1:max(seq_results.cant_SeqBlock):length(aux_mongs)
+        xline(i)
+    end
+    yline(0)
+    %ylim([min(aux_mongs) max(aux_mongs)])
+    if seq_results(1,1).flag_norm==0
+        ylim([-1.5 1.5])
+    else
+        ylim([-15 15])
+    end
+    xlim([0 length(aux_mongs)])
+    title('No Acum. corr')
+    ylabel('Micro MONGS')
 
-% MicroMongs
-subplot(2,2,2)
-plot(aux_mongs,'b.')
-for i=1:12:length(aux_mongs)
-    xline(i)
-end
-yline(0)
-%ylim([min(aux_mongs) max(aux_mongs)])
-if flag_norm==0
-    ylim([-1.5 1.5])
-else
-    ylim([-15 15])
-end
-xlim([0 length(aux_mongs)])
-title('No Acum. filt')
-ylabel('Micro MONGS')
+    % MICRO MICRO Acumulativo - Se hace la acumulación por bloque, no de la tarea completa.
+    %MicroMogs
+    seq_results(1,1).mediana_MicroMogs_acum=NaN(1,15); %15 bloques
+    seq_results(1,1).std_MicroMogs_acum=NaN(1,15);
+    subplot(2,2,3)
+    for i=1:size(seq_results.MicroMOGS_corr,1)
+         seq_results(1,1).MicroMogs_corr_acum(i,:)=cumsum(seq_results(1,1).MicroMOGS_corr(i,:),'omitnan');
+         if seq_results(1,1).flag_norm==0
+             seq_results(1,1).mediana_MicroMogs_acum(i)=nanmedian(seq_results(1,1).MicroMogs_corr_acum(i,:));
+             seq_results(1,1).std_MicroMogs_acum(i)=nanstd(seq_results(1,1).MicroMogs_corr_acum(i,:));
+         end
+         plot(((i-1)*(seq_results.cant_SeqBlock-1)+1):((i-1)*(seq_results.cant_SeqBlock-1)+1+(seq_results.cant_SeqBlock-2)),seq_results(1,1).MicroMogs_corr_acum(i,:),'r.');
+         xline((i-1)*(seq_results.cant_SeqBlock-1)+1); hold on; %la línea indica el comienzo del bloque
+    end
+    title('MICRO MOGS CORR ACUM')
+    %ylim([min(seq_results(1,1).MicroMogs_corr_acum,[],'all') max(seq_results(1,1).MicroMogs_corr_acum,[],'all')])
+    if seq_results(1,1).flag_norm==0
+        ylim([-3 3])
+    else
+        ylim([-15 15])
+    end
+    %xlim([0 length(aux_mogs)])
+    yline(0)
 
-% MICRO MICRO Acumulativo - Se hace la acumulación por bloque, no de la tarea completa.
-%MicroMogs
-seq_results(1,1).mediana_MicroMogs_acum=NaN(1,15); %15 bloques
-seq_results(1,1).std_MicroMogs_acum=NaN(1,15);
-subplot(2,2,3)
-for i=1:size(seq_results.MicroMOGS_filt,1)
-     seq_results(1,1).MicroMogs_filt_acum(i,:)=cumsum(seq_results(1,1).MicroMOGS_filt(i,:),'omitnan');
-     if flag_norm==0
-         seq_results(1,1).mediana_MicroMogs_acum(i)=nanmedian(seq_results(1,1).MicroMogs_filt_acum(i,:));
-         seq_results(1,1).std_MicroMogs_acum(i)=nanstd(seq_results(1,1).MicroMogs_filt_acum(i,:));
-     end
-     plot(((i-1)*11+1):((i-1)*11+1+10),seq_results(1,1).MicroMogs_filt_acum(i,:),'r.');
-     xline((i-1)*11+1); hold on; %la línea indica el comienzo del bloque
-end
-title('MICRO MOGS FILT ACUM')
-%ylim([min(seq_results(1,1).MicroMogs_filt_acum,[],'all') max(seq_results(1,1).MicroMogs_filt_acum,[],'all')])
-if flag_norm==0
-    ylim([-3 3])
-else
-    ylim([-15 15])
-end
-xlim([0 length(aux_mogs)])
-yline(0)
+    % MicroMongs
+    seq_results(1,1).mediana_MicroMongs_acum=NaN(1,15); %15 bloques
+    seq_results(1,1).std_MicroMongs_acum=NaN(1,15);
+    subplot(2,2,4)
+    for i=1:size(seq_results.MicroMONGS_corr,1)
+         seq_results(1,1).MicroMongs_corr_acum(i,:)=cumsum(seq_results(1,1).MicroMONGS_corr(i,:),'omitnan');
+         if seq_results(1,1).flag_norm==0
+             seq_results(1,1).mediana_MicroMongs_acum(i)=nanmedian(seq_results(1,1).MicroMongs_corr_acum(i,:));
+             seq_results(1,1).std_MicroMongs_acum(i)=nanstd(seq_results(1,1).MicroMongs_corr_acum(i,:));
+         end
+         plot(((i-1)*seq_results.cant_SeqBlock+1):((i-1)*seq_results.cant_SeqBlock+1+(seq_results.cant_SeqBlock-1)),seq_results(1,1).MicroMongs_corr_acum(i,:),'b.');
+         xline((i-1)*seq_results.cant_SeqBlock+1); hold on; %la línea indica el comienzo del bloque
+    end
+    title('MICRO MONGS CORR ACUM')
+    %ylim([min(seq_results(1,1).MicroMongs_corr_acum,[],'all') max(seq_results(1,1).MicroMongs_corr_acum,[],'all')])
+    if seq_results(1,1).flag_norm==0
+        ylim([-3 3])
+    else
+        ylim([-15 15])
+    end
+    yline(0)
+    xlim([0 length(aux_mongs)])
 
-% MicroMongs
-seq_results(1,1).mediana_MicroMongs_acum=NaN(1,15); %15 bloques
-seq_results(1,1).std_MicroMongs_acum=NaN(1,15);
-subplot(2,2,4)
-for i=1:size(seq_results.MicroMONGS_filt,1)
-     seq_results(1,1).MicroMongs_filt_acum(i,:)=cumsum(seq_results(1,1).MicroMONGS_filt(i,:),'omitnan');
-     if flag_norm==0
-         seq_results(1,1).mediana_MicroMongs_acum(i)=nanmedian(seq_results(1,1).MicroMongs_filt_acum(i,:));
-         seq_results(1,1).std_MicroMongs_acum(i)=nanstd(seq_results(1,1).MicroMongs_filt_acum(i,:));
-     end
-     plot(((i-1)*12+1):((i-1)*12+1+11),seq_results(1,1).MicroMongs_filt_acum(i,:),'b.');
-     xline((i-1)*12+1); hold on; %la línea indica el comienzo del bloque
-end
-title('MICRO MONGS FILT ACUM')
-%ylim([min(seq_results(1,1).MicroMongs_filt_acum,[],'all') max(seq_results(1,1).MicroMongs_filt_acum,[],'all')])
-if flag_norm==0
-    ylim([-3 3])
-else
-    ylim([-15 15])
-end
-yline(0)
-xlim([0 length(aux_mongs)])
-
-clear aux_mogs; clear aux_mongs; clear i;
-%% Save figure: .fig and .png
-saveas(gcf,[path fname(1:end-4) '_MicroMicroGains_filt.' 'fig']);
-saveas(gcf,[path fname(1:end-4) '_MicroMicroGains_filt.' 'png']);
-
+    clear aux_mogs; clear aux_mongs; clear i;
+    %% Save figure: .fig and .png
+    saveas(gcf,[path fname(1:end-4) '_MicroMicroGains_corr.' 'fig']);
+    saveas(gcf,[path fname(1:end-4) '_MicroMicroGains_corr.' 'png']);
+end %end if data_corr
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -494,7 +507,9 @@ saveas(gcf,[path fname(1:end-4) '_MicroMicroGains_filt.' 'png']);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 figure(7); set(gcf,'Color','white'); box OFF; hold on;
 
-subplot(2,1,1)
+if seq_results(1,1).flag_filt ==1
+    subplot(2,1,1)
+end
 barra=max(seq_results(1,1).interkey_matrix,[],'all')+0.1;
 for j=1:4:size(seq_results(1,1).interkey_matrix,2)
     %secuencia
@@ -512,26 +527,27 @@ xlabel('transitions');
 ylabel('time [s]');
 title('Raw')
 
-subplot(2,1,2)
-for j=1:4:size(seq_results(1,1).interkey_matrix_filt,2)
-    %secuencia
-    plot(j:j+3,seq_results(1,1).interkey_matrix_filt(:,j:j+3),'k-'); hold on;
-    %barras de ITI
-    if mod(j-1,48)== 0 %si j cae en un rest hay que poner la barra de otro color. Hay 48= 4 transiciones x 12 secuencias
-        bar(j-4+3.5,barra,1,'FaceColor',[128 193 219]./255,'EdgeColor',[128 193 219]./255);
-        hold on;
+if seq_results(1,1).flag_filt ==1
+    subplot(2,1,2)
+    for j=1:4:size(seq_results(1,1).interkey_matrix_corr,2)
+        %secuencia
+        plot(j:j+3,seq_results(1,1).interkey_matrix_corr(:,j:j+3),'k-'); hold on;
+        %barras de ITI
+        if mod(j-1,4*seq_results.cant_SeqBlock)== 0 %si j cae en un rest hay que poner la barra de otro color. Hay 48= 4 transiciones x 12 secuencias
+            bar(j-4+3.5,barra,1,'FaceColor',[128 193 219]./255,'EdgeColor',[128 193 219]./255);
+            hold on;
+        end
+         bar(j+3.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
+         hold on;
+
     end
-     bar(j+3.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
-     hold on;
-
+    xlabel('transitions');
+    ylabel('time [s]');
+    title('Filt')
 end
-xlabel('transitions');
-ylabel('time [s]');
-title('Filt')
-
 %% save
-saveas(gcf,[path ['curva_seq_crudo' '.'] 'fig']);
-saveas(gcf,[path ['curva_seq_crudo' '.'] 'png']);
+saveas(gcf,[path ['curva_seq' '.'] 'fig']);
+saveas(gcf,[path ['curva_seq' '.'] 'png']);
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -551,12 +567,12 @@ figure(8); set(gcf,'Color','white'); box OFF; hold on;
 seq_results(1,1).mediana_MicroMogs=NaN(1,15);
 seq_results(1,1).std_MicroMogs=NaN(1,15);
 
-for i=1:size(seq_results.MicroMOGS_filt,1)
-    seq_results(1,1).mediana_MicroMogs(i)=nanmedian(seq_results.MicroMOGS_filt(i,:));
-    seq_results(1,1).std_MicroMogs(i)=nanstd(seq_results.MicroMOGS_filt(i,:));
+for i=1:size(seq_results.MicroMOGS_corr,1)
+    seq_results(1,1).mediana_MicroMogs(i)=nanmedian(seq_results.MicroMOGS_corr(i,:));
+    seq_results(1,1).std_MicroMogs(i)=nanstd(seq_results.MicroMOGS_corr(i,:));
 end
 
-if flag_norm==0
+if seq_results(1,1).flag_norm==0
     subplot(2,2,1)
     plot(seq_results(1,1).mediana_MicroMogs,'r.')
     errorbar(seq_results(1,1).mediana_MicroMogs,seq_results(1,1).std_MicroMogs,'r')
@@ -576,12 +592,12 @@ title('No acum')
 seq_results(1,1).mediana_MicroMongs=NaN(1,15);
 seq_results(1,1).std_MicroMongs=NaN(1,15);
 
-for i=1:size(seq_results.MicroMONGS_filt,1)
-    seq_results(1,1).mediana_MicroMongs(i)=nanmedian(seq_results.MicroMONGS_filt(i,:));
-    seq_results(1,1).std_MicroMongs(i)=nanstd(seq_results.MicroMONGS_filt(i,:));
+for i=1:size(seq_results.MicroMONGS_corr,1)
+    seq_results(1,1).mediana_MicroMongs(i)=nanmedian(seq_results.MicroMONGS_corr(i,:));
+    seq_results(1,1).std_MicroMongs(i)=nanstd(seq_results.MicroMONGS_corr(i,:));
 end
 
-if flag_norm==0
+if seq_results(1,1).flag_norm==0
     subplot(2,2,2)
     plot(seq_results(1,1).mediana_MicroMongs,'b.')
     errorbar(seq_results(1,1).mediana_MicroMongs,seq_results(1,1).std_MicroMongs,'b')
@@ -597,7 +613,7 @@ ylabel('MicroMongs [s]')
 xlabel('Block')
 title('No acum')
 
-if flag_norm==0 %si no esta normalizado
+if seq_results(1,1).flag_norm==0 %si no esta normalizado
     % MOGS ACUM
     subplot(2,2,3)
     plot(seq_results(1,1).mediana_MicroMogs_acum,'r.')
@@ -623,6 +639,19 @@ end
 %% save
 saveas(gcf,[path fname(1:end-4) ['_MicroMicroGains_Median' '.'] 'fig']);
 saveas(gcf,[path fname(1:end-4) ['_MicroMicroGains_Median' '.'] 'png']);
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                     Learning Curve by Bonstrup                      %%%
+%%%                         GC 23/6/23                                  %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+seq_results.IKI_visual=Visualization_LearningCurve(seq_results(1,1).IKI_per_trial,seq_results(1,1).seqduration,seq_results);
+saveas(gcf,[path fname(1:end-4) '_CurvaLearningVisual.' 'fig']);
+saveas(gcf,[path fname(1:end-4) '_CurvaLearningVisual.' 'png']);
+
+seq_results.IKI_visual_corr=Visualization_LearningCurve(seq_results(1,1).IKI_per_trial_corr,seq_results(1,1).seqduration,seq_results);
+saveas(gcf,[path fname(1:end-4) '_CurvaLearningVisual_corr.' 'fig']);
+saveas(gcf,[path fname(1:end-4) '_CurvaLearningVisual_corr.' 'png']);
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                             FIGURE 9                                %%%

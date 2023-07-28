@@ -7,9 +7,9 @@
 %%%    individual (from "Analisis_Seq_Individual.m") from all subjects  %%%
 %%%    being analized as a group.                                       %%%
 %%%    - Path: where to store the figures                               %%%
-%%%    - Titulo: how the group is called. example: "With ITI"            %%%
+%%%    - Titulo: how the group is called. example: "With ITI"           %%%
 %%%    - Paradigm_flag: wich paradigm is being analyzed "time" or "key" %%%
-%%%    - N: subjects
+%%%    - N: subjects                                                    %%%
 %%%                                                                     %%%
 %%% Group_Results: stores the results as mean value and standard error  %%% 
 %%%                                                                     %%%
@@ -97,38 +97,41 @@ Group_Results.iki_group_std = nanstd(Group_Parameters.iki_group,0,1)/sqrt(N);
 
 barra=max(Group_Results.iki_group_mean(:)+0.1);
 if strcmp(paradigm_flag,'teclas')==1
-    for i=1:12:length(Group_Results.iki_group_mean)
+    for i=1:Group_Parameters.cant_SeqBlock:length(Group_Results.iki_group_mean)
         %error estandar
-        x_vector = [i:i+11, fliplr(i:i+11)];
-        x_vector2=[Group_Results.iki_group_mean(i:i+11)+Group_Results.iki_group_std(i:i+11),fliplr(Group_Results.iki_group_mean(i:i+11)-Group_Results.iki_group_std(i:i+11))];
+        x_vector = [i:i+(Group_Parameters.cant_SeqBlock-1), fliplr(i:i+(Group_Parameters.cant_SeqBlock-1))];
+        x_vector2=[Group_Results.iki_group_mean(i:i+(Group_Parameters.cant_SeqBlock-1))+Group_Results.iki_group_std(i:i+(Group_Parameters.cant_SeqBlock-1)),fliplr(Group_Results.iki_group_mean(i:i+(Group_Parameters.cant_SeqBlock-1))-Group_Results.iki_group_std(i:i+(Group_Parameters.cant_SeqBlock-1)))];
         patch = fill(x_vector, x_vector2, [128 193 219]./255);
         set(patch, 'edgecolor', 'none');
         set(patch, 'FaceAlpha', 1);
         hold on;
 
         %media
-        plot(i:i+11,Group_Results.iki_group_mean(i:i+11),'k','LineWidth',0.5);
+        plot(i:i+(Group_Parameters.cant_SeqBlock-1),Group_Results.iki_group_mean(i:i+(Group_Parameters.cant_SeqBlock-1)),'k','LineWidth',0.5);
         hold on;
 
         %barras de rest
-        bar(i+11.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
+        bar(i+(Group_Parameters.cant_SeqBlock-1)+0.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
         hold on;
     end
     
 else %Cuando corta por tiempo
     
-    for i=1:max_seq:length(Group_Results.iki_group_mean)
+    for i=1:Group_Parameters.cant_SeqBlock:length(Group_Results.iki_group_mean)
         %error estandar
-        x_vector = [i:(i+max_seq-1), fliplr(i:(i+max_seq-1))];
-        x_vector2=[Group_Results.iki_group_mean(i:(i+max_seq-1))+Group_Results.iki_group_std(i:(i+max_seq-1)),fliplr(Group_Results.iki_group_mean(i:(i+max_seq-1)) - Group_Results.iki_group_std(i:(i+max_seq-1)))];
+        x_vector = [i:(i+Group_Parameters.cant_SeqBlock-1), fliplr(i:(i+Group_Parameters.cant_SeqBlock-1))];
+        x_vector2=[Group_Results.iki_group_mean(i:(i+Group_Parameters.cant_SeqBlock-1))+Group_Results.iki_group_std(i:(i+Group_Parameters.cant_SeqBlock-1)),fliplr(Group_Results.iki_group_mean(i:(i+Group_Parameters.cant_SeqBlock-1)) - Group_Results.iki_group_std(i:(i+Group_Parameters.cant_SeqBlock-1)))];
         
         %este contador me va a permitir no graficar los errores de los NaNs y poder cerrar los patch para rellenarlos
         cont=1;
-        while ~isnan(x_vector2(cont))
+        while cont<=length(x_vector2) && ~isnan(x_vector2(cont)) 
             cont=cont+1; 
         end
         cont=cont-1;
         x_vector2(isnan(x_vector2))=[];
+        if cont >= Group_Parameters.cant_SeqBlock
+            cont=cont/2;
+        end
         x_vector=[x_vector(1:cont) x_vector((end-cont+1):end)];
                 
         patch = fill(x_vector, x_vector2, [128 193 219]./255);
@@ -138,11 +141,11 @@ else %Cuando corta por tiempo
         hold on;
 
         %media
-        plot(i:i+max_seq-1,Group_Results.iki_group_mean(i:(i+max_seq-1)),'k','LineWidth',0.5);
+        plot(i:i+Group_Parameters.cant_SeqBlock-1,Group_Results.iki_group_mean(i:(i+Group_Parameters.cant_SeqBlock-1)),'k','LineWidth',0.5);
         hold on;
 
         %barras de rest
-        bar(i+(max_seq-1)+0.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
+        bar(i+(Group_Parameters.cant_SeqBlock-1)+0.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
         hold on;
     end
     
@@ -156,91 +159,93 @@ xlim([0 length(Group_Results.iki_group_mean)+1]);
 saveas(gcf,[path 'CurvaLearning_Group.' 'fig']);
 saveas(gcf,[path 'CurvaLearning_Group.' 'png']);
 
-clear x_vector; clear x_vector2; clear barra; clear i; clear patch; clear cont; clear max_seq;
+clear x_vector; clear x_vector2; clear barra; clear i; clear patch; clear cont; 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% FIGURE 3: It's also included the filtered version of IKI_per_trial  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-figure(3); set(gcf,'Color','white'); box OFF; hold on; %sgtitle([titulo ' - filtrado'])
+if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
+    figure(3); set(gcf,'Color','white'); box OFF; hold on; sgtitle([titulo ' - ' Group_Parameters.titulo_analisis])
 
-Group_Results.iki_group_filt_mean = nanmean(Group_Parameters.iki_group_filt,1);              
-Group_Results.iki_group_filt_std = nanstd(Group_Parameters.iki_group_filt,0,1)/sqrt(N);               
+    Group_Results.iki_group_corr_mean = nanmean(Group_Parameters.iki_group_corr,1);              
+    Group_Results.iki_group_corr_std = nanstd(Group_Parameters.iki_group_corr,0,1)/sqrt(N);               
 
-barra=max(Group_Results.iki_group_filt_mean(:)+0.1); 
-if strcmp(paradigm_flag,'teclas')==1
-    for i=1:12:length(Group_Results.iki_group_filt_mean)
-        %error estandar
-        x_vector = [i:i+11, fliplr(i:i+11)];
-        x_vector2=[Group_Results.iki_group_filt_mean(i:i+11)+Group_Results.iki_group_filt_std(i:i+11),fliplr(Group_Results.iki_group_filt_mean(i:i+11)-Group_Results.iki_group_filt_std(i:i+11))];
-        patch = fill(x_vector, x_vector2, [128 193 219]./255);
-        set(patch, 'edgecolor', 'none');
-        set(patch, 'FaceAlpha', 1);
-        hold on;
+    barra=max(Group_Results.iki_group_corr_mean(:)+0.1); 
+    if strcmp(paradigm_flag,'teclas')==1
+        for i=1:Group_Parameters.cant_SeqBlock:length(Group_Results.iki_group_corr_mean)
+            %error estandar
+            x_vector = [i:i+(Group_Parameters.cant_SeqBlock-1), fliplr(i:i+(Group_Parameters.cant_SeqBlock-1))];
+            x_vector2=[Group_Results.iki_group_corr_mean(i:i+(Group_Parameters.cant_SeqBlock-1))+Group_Results.iki_group_corr_std(i:i+(Group_Parameters.cant_SeqBlock-1)),fliplr(Group_Results.iki_group_corr_mean(i:i+(Group_Parameters.cant_SeqBlock-1))-Group_Results.iki_group_corr_std(i:i+(Group_Parameters.cant_SeqBlock-1)))];
+            patch = fill(x_vector, x_vector2, [128 193 219]./255);
+            set(patch, 'edgecolor', 'none');
+            set(patch, 'FaceAlpha', 1);
+            hold on;
 
-        %media
-        plot(i:i+11,Group_Results.iki_group_filt_mean(i:i+11),'k','LineWidth',0.5);
-        hold on;
+            %media
+            plot(i:i+(Group_Parameters.cant_SeqBlock-1),Group_Results.iki_group_corr_mean(i:i+(Group_Parameters.cant_SeqBlock-1)),'k','LineWidth',0.5);
+            hold on;
 
-        %barras de rest
-        bar(i+11.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
-        hold on;
-    end
-    
-else %Cuando corta por tiempo
-    
-    for i=1:max_seq:length(Group_Results.iki_group_filt_mean)
-        %error estandar
-        x_vector = [i:(i+max_seq-1), fliplr(i:(i+max_seq-1))];
-        x_vector2=[Group_Results.iki_group_filt_mean(i:(i+max_seq-1))+Group_Results.iki_group_filt_std(i:(i+max_seq-1)),fliplr(Group_Results.iki_group_filt_mean(i:(i+max_seq-1)) - Group_Results.iki_group_filt_std(i:(i+max_seq-1)))];
-        
-        %este contador me va a permitir no graficar los errores de los NaNs y poder cerrar los patch para rellenarlos
-        cont=1;
-        while ~isnan(x_vector2(cont))
-            cont=cont+1; 
+            %barras de rest
+            bar(i+11.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
+            hold on;
         end
-        cont=cont-1;
-        x_vector2(isnan(x_vector2))=[];
-        x_vector=[x_vector(1:cont) x_vector((end-cont+1):end)];
-                
-        patch = fill(x_vector, x_vector2, [128 193 219]./255);
-        set(patch, 'edgecolor', 'none');
-        set(patch, 'FaceAlpha', 1);
-       
-        hold on;
 
-        %media
-        plot(i:i+max_seq-1,Group_Results.iki_group_filt_mean(i:(i+max_seq-1)),'k','LineWidth',0.5);
-        hold on;
+    else %Cuando corta por tiempo
 
-        %barras de rest
-        bar(i+(max_seq-1)+0.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
-        hold on;
+        for i=1:Group_Parameters.cant_SeqBlock:length(Group_Results.iki_group_corr_mean)
+            %error estandar
+            x_vector = [i:(i+Group_Parameters.cant_SeqBlock-1), fliplr(i:(i+Group_Parameters.cant_SeqBlock-1))];
+            x_vector2=[Group_Results.iki_group_corr_mean(i:(i+Group_Parameters.cant_SeqBlock-1))+Group_Results.iki_group_corr_std(i:(i+Group_Parameters.cant_SeqBlock-1)),fliplr(Group_Results.iki_group_corr_mean(i:(i+Group_Parameters.cant_SeqBlock-1)) - Group_Results.iki_group_corr_std(i:(i+Group_Parameters.cant_SeqBlock-1)))];
+
+            %este contador me va a permitir no graficar los errores de los NaNs y poder cerrar los patch para rellenarlos
+            cont=1;
+            while cont<=length(x_vector2)&& ~isnan(x_vector2(cont)) 
+                cont=cont+1; 
+            end
+            cont=cont-1;
+            if cont >= Group_Parameters.cant_SeqBlock
+                cont=cont/2;
+            end
+            x_vector2(isnan(x_vector2))=[];
+            x_vector=[x_vector(1:cont) x_vector((end-cont+1):end)];
+
+            patch = fill(x_vector, x_vector2, [128 193 219]./255);
+            set(patch, 'edgecolor', 'none');
+            set(patch, 'FaceAlpha', 1);
+
+            hold on;
+
+            %media
+            plot(i:i+Group_Parameters.cant_SeqBlock-1,Group_Results.iki_group_corr_mean(i:(i+Group_Parameters.cant_SeqBlock-1)),'k','LineWidth',0.5);
+            hold on;
+
+            %barras de rest
+            bar(i+(Group_Parameters.cant_SeqBlock-1)+0.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
+            hold on;
+        end
+
     end
+    xlabel('Blocks','FontName','Arial','FontSize',12)
+    ylabel('Interkeys interval','FontName','Arial','FontSize',12);
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        %misma escala q crudo
+        ylim([min(Group_Results.iki_group_mean-0.1) max(Group_Results.iki_group_mean+0.1)])
+    else
+        if strcmp(Group_Parameters.flag_tipo_norm,'Z')
+            ylim([-3 3])
+        else %norm 01
+            ylim([0 1])
+        end
+    end
+    xlim([0 length(Group_Results.iki_group_mean)+1]);
+
+    clear x_vector; clear x_vector2; clear barra; clear i; clear patch; clear cont; clear norm_titulo;
+
+    saveas(gcf,[path 'CurvaLearning_corr_Group.' 'fig']);
+    saveas(gcf,[path 'CurvaLearning_corr_Group.' 'png']);
     
-end
-xlabel('Blocks','FontName','Arial','FontSize',12)
-ylabel('Interkeys interval','FontName','Arial','FontSize',12);
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    %misma escala q crudo
-    ylim([min(Group_Results.iki_group_mean-0.1) max(Group_Results.iki_group_mean+0.1)])
-    norm_titulo='sin norm';
-else
-    if strcmp(Group_Parameters.flag_tipo_norm,'Z')
-        ylim([-3 3])
-    else %norm 01
-        ylim([0 1])
-    end
-    norm_titulo=Group_Parameters.flag_tipo_norm;
-end
-xlim([0 length(Group_Results.iki_group_mean)+1]);
-title([titulo ' - Curva de Learning - Datos filtrados - ' norm_titulo])
-
-clear x_vector; clear x_vector2; clear barra; clear i; clear patch; clear cont; clear max_seq; clear norm_titulo;
-
-saveas(gcf,[path 'CurvaLearning_filt_Group.' 'fig']);
-saveas(gcf,[path 'CurvaLearning_filt_Group.' 'png']);
-
+end % end si esta corregido
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                        FIGURE 4:                                    %%%
@@ -477,152 +482,151 @@ saveas(gcf,[path '_MicroGains_crudo_Group.' 'png']);
 %%%                                                                     %%%
 %%%               Plots Micro Gains as filtered data.                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-figure(6); set(gcf,'Color','white'); box OFF; hold on; %sgtitle([titulo ' - filtrado'])
+if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
 
-%% MOGS acumulado
-Group_Results.mogs_group_acumulado_filt_mean = nanmean(Group_Parameters.mogs_acumulado_group_filt,1);                                       
-Group_Results.mogs_group_acumulado_filt_std = nanstd(Group_Parameters.mogs_acumulado_group_filt,0,1)/sqrt(N);    
+    figure(6); set(gcf,'Color','white'); box OFF; hold on; sgtitle([titulo ' - ' Group_Parameters.titulo_analisis '- acum'])
 
-subplot(1,4,3)
-plot(Group_Results.mogs_group_acumulado_filt_mean,'r.','MarkerSize', 15); hold on;
+    %% MOGS acumulado
+    Group_Results.mogs_group_acumulado_corr_mean = nanmean(Group_Parameters.mogs_acumulado_group_corr,1);                                       
+    Group_Results.mogs_group_acumulado_corr_std = nanstd(Group_Parameters.mogs_acumulado_group_corr,0,1)/sqrt(N);    
 
-for i=1:size(Group_Parameters.mogs_acumulado_group_filt,1)
-    s=scatter(1:size(Group_Parameters.mogs_acumulado_group_filt,2),Group_Parameters.mogs_acumulado_group_filt(i,:),'r','filled','MarkerEdgeAlpha',0.1);
-    s.MarkerFaceAlpha = 0.1;
-    hold on;
-end
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('MOGs','FontName','Arial','FontSize',12);
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    %misma escala q crudo
-    ylim([-1 1])
-else
-    if strcmp(Group_Parameters.flag_tipo_norm,'Z')
-        ylim([-10 10])
-    else %norm 01
-        ylim([-3 3])
+    subplot(1,4,3)
+    plot(Group_Results.mogs_group_acumulado_corr_mean,'r.','MarkerSize', 15); hold on;
+
+    for i=1:size(Group_Parameters.mogs_acumulado_group_corr,1)
+        s=scatter(1:size(Group_Parameters.mogs_acumulado_group_corr,2),Group_Parameters.mogs_acumulado_group_corr(i,:),'r','filled','MarkerEdgeAlpha',0.1);
+        s.MarkerFaceAlpha = 0.1;
+        hold on;
     end
-end
-xlim([0 length(Group_Results.mogs_group_acumulado_filt_mean)]);
-yline(0);
-
-%% MONGS acumulado
-Group_Results.mongs_group_acumulado_filt_mean = nanmean(Group_Parameters.mongs_acumulado_group_filt,1);                                       
-Group_Results.mongs_group_acumulado_filt_std = nanstd(Group_Parameters.mongs_acumulado_group_filt,0,1)/sqrt(N);    
-
-subplot(1,4,2)
-plot(Group_Results.mongs_group_acumulado_filt_mean,'b.','MarkerSize',15); hold on;
-
-for i=1:size(Group_Parameters.mongs_acumulado_group_filt,1)
-    s=scatter(1:size(Group_Parameters.mongs_acumulado_group_filt,2),Group_Parameters.mongs_acumulado_group_filt(i,:),'b','filled','MarkerEdgeAlpha',0.1);
-    s.MarkerFaceAlpha = 0.1;
-    hold on;
-end
-
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('MONGs','FontName','Arial','FontSize',12);
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    %misma escala q crudo
-    ylim([-1 1])
-else
-    if strcmp(Group_Parameters.flag_tipo_norm,'Z')
-        ylim([-10 10])
-    else %norm 01
-        ylim([-3 3])
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('MOGs','FontName','Arial','FontSize',12);
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        %misma escala q crudo
+        ylim([-1 1])
+    else
+        if strcmp(Group_Parameters.flag_tipo_norm,'Z')
+            ylim([-10 10])
+        else %norm 01
+            ylim([-3 3])
+        end
     end
-end
-xlim([0 length(Group_Results.mongs_group_acumulado_filt_mean)]);
-yline(0);
+    xlim([0 length(Group_Results.mogs_group_acumulado_corr_mean)]);
+    yline(0);
 
-%% TOTAL LEARNING
-Group_Results.TL_group_acumulado_filt_mean = nanmean(Group_Parameters.TL_acumulado_group_filt,1);                                       
-Group_Results.TL_group_acumulado_filt_std = nanstd(Group_Parameters.TL_acumulado_group_filt,0,1)/sqrt(N);  
+    %% MONGS acumulado
+    Group_Results.mongs_group_acumulado_corr_mean = nanmean(Group_Parameters.mongs_acumulado_group_corr,1);                                       
+    Group_Results.mongs_group_acumulado_corr_std = nanstd(Group_Parameters.mongs_acumulado_group_corr,0,1)/sqrt(N);    
 
-subplot(1,4,1)
-plot(Group_Results.TL_group_acumulado_filt_mean,'k.','MarkerSize',15); hold on;
+    subplot(1,4,2)
+    plot(Group_Results.mongs_group_acumulado_corr_mean,'b.','MarkerSize',15); hold on;
 
-for i=1:size(Group_Parameters.TL_acumulado_group_filt,1)
-    s=scatter(1:size(Group_Parameters.TL_acumulado_group_filt,2),Group_Parameters.TL_acumulado_group_filt(i,:),'k','filled','MarkerEdgeAlpha',0.1);
-    s.MarkerFaceAlpha = 0.1;
-    hold on;
-end
-
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('Total Learning','FontName','Arial','FontSize',12);
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    %misma escala q crudo
-    ylim([-1 1])
-else
-    if strcmp(Group_Parameters.flag_tipo_norm,'Z')
-        ylim([-10 10])
-    else %norm 01
-        ylim([-3 3])
+    for i=1:size(Group_Parameters.mongs_acumulado_group_corr,1)
+        s=scatter(1:size(Group_Parameters.mongs_acumulado_group_corr,2),Group_Parameters.mongs_acumulado_group_corr(i,:),'b','filled','MarkerEdgeAlpha',0.1);
+        s.MarkerFaceAlpha = 0.1;
+        hold on;
     end
-end
-xlim([0 length(Group_Results.TL_group_acumulado_filt_mean)]);
-yline(0);
 
-%% Grafico completo
-subplot(1,4,4)
-
-%mogs
-    %error estandar
-    x_vector = [1:length(Group_Results.mogs_group_acumulado_filt_mean), fliplr(1:length(Group_Results.mogs_group_acumulado_filt_mean))];
-    patch = fill(x_vector, [Group_Results.mogs_group_acumulado_filt_mean + Group_Results.mogs_group_acumulado_filt_std , fliplr(Group_Results.mogs_group_acumulado_filt_mean - Group_Results.mogs_group_acumulado_filt_std)], [243 169 114]./255);
-    set(patch, 'edgecolor', 'none');
-    set(patch, 'FaceAlpha', 0.3);
-    hold on;
-    %media
-    plot(Group_Results.mogs_group_acumulado_filt_mean,'r','LineWidth',0.5);
-%mongs
-
-  %error estandar
-    x_vector = [1:length(Group_Results.mongs_group_acumulado_filt_mean), fliplr(1:length(Group_Results.mongs_group_acumulado_filt_mean))];
-    patch = fill(x_vector, [Group_Results.mongs_group_acumulado_filt_mean + Group_Results.mongs_group_acumulado_filt_std , fliplr(Group_Results.mongs_group_acumulado_filt_mean - Group_Results.mongs_group_acumulado_filt_std)],[128 193 219]./255);
-    set(patch, 'edgecolor', 'none');
-    set(patch, 'FaceAlpha', 0.3);
-    hold on;
-    %media
-    plot(Group_Results.mongs_group_acumulado_filt_mean,'b','LineWidth',0.5);
-
-%Total Learning
-
-    %error estandar
-    x_vector = [1:length(Group_Results.TL_group_acumulado_filt_mean), fliplr(1:length(Group_Results.TL_group_acumulado_filt_mean))];
-    patch = fill(x_vector, [Group_Results.TL_group_acumulado_filt_mean + Group_Results.TL_group_acumulado_filt_std , fliplr(Group_Results.TL_group_acumulado_filt_mean - Group_Results.TL_group_acumulado_filt_std)], [200 200 200]./255);
-    set(patch, 'edgecolor', 'none');
-    set(patch, 'FaceAlpha', 0.5);
-    hold on;
-    
-    %media
-    plot(Group_Results.TL_group_acumulado_filt_mean,'k','LineWidth',0.5);
-
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    %misma escala q crudo
-    ylim([-1 1])
-    norm_titulo='sin norm';
-else
-    if strcmp(Group_Parameters.flag_tipo_norm,'Z')
-        ylim([-10 10])
-    else %norm 01
-        ylim([-3 3])
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('MONGs','FontName','Arial','FontSize',12);
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        %misma escala q crudo
+        ylim([-1 1])
+    else
+        if strcmp(Group_Parameters.flag_tipo_norm,'Z')
+            ylim([-10 10])
+        else %norm 01
+            ylim([-3 3])
+        end
     end
-    norm_titulo=Group_Parameters.flag_tipo_norm;
-end
-sgtitle([titulo ' - Datos filtrados - ' norm_titulo])
-yline(0);
-xlabel('Blocks')
-legend('','MOGS','', 'MONGS', '', 'Total Learning')
+    xlim([0 length(Group_Results.mongs_group_acumulado_corr_mean)]);
+    yline(0);
 
-clear x_vector; clear i; clear patch; clear norm_titulo;
+    %% TOTAL LEARNING
+    Group_Results.TL_group_acumulado_corr_mean = nanmean(Group_Parameters.TL_acumulado_group_corr,1);                                       
+    Group_Results.TL_group_acumulado_corr_std = nanstd(Group_Parameters.TL_acumulado_group_corr,0,1)/sqrt(N);  
 
-saveas(gcf,[path '_MicroGains_filt_acum_Group.' 'fig']);
-saveas(gcf,[path '_MicroGains_filt_acum_Group.' 'png']);
+    subplot(1,4,1)
+    plot(Group_Results.TL_group_acumulado_corr_mean,'k.','MarkerSize',15); hold on;
 
+    for i=1:size(Group_Parameters.TL_acumulado_group_corr,1)
+        s=scatter(1:size(Group_Parameters.TL_acumulado_group_corr,2),Group_Parameters.TL_acumulado_group_corr(i,:),'k','filled','MarkerEdgeAlpha',0.1);
+        s.MarkerFaceAlpha = 0.1;
+        hold on;
+    end
+
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('Total Learning','FontName','Arial','FontSize',12);
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        %misma escala q crudo
+        ylim([-1 1])
+    else
+        if strcmp(Group_Parameters.flag_tipo_norm,'Z')
+            ylim([-10 10])
+        else %norm 01
+            ylim([-3 3])
+        end
+    end
+    xlim([0 length(Group_Results.TL_group_acumulado_corr_mean)]);
+    yline(0);
+
+    %% Grafico completo
+    subplot(1,4,4)
+
+    %mogs
+        %error estandar
+        x_vector = [1:length(Group_Results.mogs_group_acumulado_corr_mean), fliplr(1:length(Group_Results.mogs_group_acumulado_corr_mean))];
+        patch = fill(x_vector, [Group_Results.mogs_group_acumulado_corr_mean + Group_Results.mogs_group_acumulado_corr_std , fliplr(Group_Results.mogs_group_acumulado_corr_mean - Group_Results.mogs_group_acumulado_corr_std)], [243 169 114]./255);
+        set(patch, 'edgecolor', 'none');
+        set(patch, 'FaceAlpha', 0.3);
+        hold on;
+        %media
+        plot(Group_Results.mogs_group_acumulado_corr_mean,'r','LineWidth',0.5);
+    %mongs
+
+      %error estandar
+        x_vector = [1:length(Group_Results.mongs_group_acumulado_corr_mean), fliplr(1:length(Group_Results.mongs_group_acumulado_corr_mean))];
+        patch = fill(x_vector, [Group_Results.mongs_group_acumulado_corr_mean + Group_Results.mongs_group_acumulado_corr_std , fliplr(Group_Results.mongs_group_acumulado_corr_mean - Group_Results.mongs_group_acumulado_corr_std)],[128 193 219]./255);
+        set(patch, 'edgecolor', 'none');
+        set(patch, 'FaceAlpha', 0.3);
+        hold on;
+        %media
+        plot(Group_Results.mongs_group_acumulado_corr_mean,'b','LineWidth',0.5);
+
+    %Total Learning
+
+        %error estandar
+        x_vector = [1:length(Group_Results.TL_group_acumulado_corr_mean), fliplr(1:length(Group_Results.TL_group_acumulado_corr_mean))];
+        patch = fill(x_vector, [Group_Results.TL_group_acumulado_corr_mean + Group_Results.TL_group_acumulado_corr_std , fliplr(Group_Results.TL_group_acumulado_corr_mean - Group_Results.TL_group_acumulado_corr_std)], [200 200 200]./255);
+        set(patch, 'edgecolor', 'none');
+        set(patch, 'FaceAlpha', 0.5);
+        hold on;
+
+        %media
+        plot(Group_Results.TL_group_acumulado_corr_mean,'k','LineWidth',0.5);
+
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        %misma escala q crudo
+        ylim([-1 1])
+    else
+        if strcmp(Group_Parameters.flag_tipo_norm,'Z')
+            ylim([-10 10])
+        else %norm 01
+            ylim([-3 3])
+        end
+    end
+    yline(0);
+    xlabel('Blocks')
+    legend('','MOGS','', 'MONGS', '', 'Total Learning')
+
+    clear x_vector; clear i; clear patch; clear norm_titulo;
+
+    saveas(gcf,[path '_MicroGains_corr_acum_Group.' 'fig']);
+    saveas(gcf,[path '_MicroGains_corr_acum_Group.' 'png']);
+end %if si esta corregido
  %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                          FIGURE 7                                   %%%
@@ -634,125 +638,123 @@ saveas(gcf,[path '_MicroGains_filt_acum_Group.' 'png']);
 %%%                                                                     %%%
 %%%                         GC 7/3/23                                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
 
-figure(7); set(gcf,'Color','white'); box OFF; hold on; %sgtitle([titulo ' - filt - 01 - no acum'])
+    figure(7); set(gcf,'Color','white'); box OFF; hold on; sgtitle([titulo ' - ' Group_Parameters.titulo_analisis ' - no acum']);
 
-Group_Results.mogs_group_filt_mean = nanmean(Group_Parameters.mogs_group_filt,1);                                       
-Group_Results.mogs_group_filt_std = nanstd(Group_Parameters.mogs_group_filt,0,1)/sqrt(N);               
+    Group_Results.mogs_group_corr_mean = nanmean(Group_Parameters.mogs_group_corr,1);                                       
+    Group_Results.mogs_group_corr_std = nanstd(Group_Parameters.mogs_group_corr,0,1)/sqrt(N);               
 
-subplot(1,4,3)
-plot(Group_Results.mogs_group_filt_mean,'r.','MarkerSize', 15); hold on;
+    subplot(1,4,3)
+    plot(Group_Results.mogs_group_corr_mean,'r.','MarkerSize', 15); hold on;
 
-for i=1:size(Group_Parameters.mogs_group_filt,1)
-    s=scatter(1:size(Group_Parameters.mogs_group_filt,2),Group_Parameters.mogs_group_filt(i,:),'r','filled','MarkerEdgeAlpha',0.1);
-    s.MarkerFaceAlpha = 0.1;
-    hold on;
-end
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('MOGs','FontName','Arial','FontSize',12);
-ylim([-1 1])
-xlim([0 length(Group_Results.mogs_group_filt_mean)]);
-yline(0);
-
-%% MONGS no acumulado
-
-Group_Results.mongs_group_filt_mean = nanmean(Group_Parameters.mongs_group_filt,1);                                       
-Group_Results.mongs_group_filt_std = nanstd(Group_Parameters.mongs_group_filt,0,1)/sqrt(N);    
-
-subplot(1,4,2)
-plot(Group_Results.mongs_group_filt_mean,'b.','MarkerSize',15); hold on;
-
-for i=1:size(Group_Parameters.mongs_group_filt,1)
-    s=scatter(1:size(Group_Parameters.mongs_group_filt,2),Group_Parameters.mongs_group_filt(i,:),'b','filled','MarkerEdgeAlpha',0.1);
-    s.MarkerFaceAlpha = 0.1;
-    hold on;
-end
-
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('MONGs','FontName','Arial','FontSize',12);
-ylim([-1 1])
-xlim([0 length(Group_Results.mongs_group_filt_mean)]);
-yline(0);
-
-%% TOTAL LEARNING
-
-Group_Results.TL_group_filt_mean = nanmean(Group_Parameters.TL_group_filt,1);                                       
-Group_Results.TL_group_filt_std = nanstd(Group_Parameters.TL_group_filt,0,1)/sqrt(N);  
-
-subplot(1,4,1)
-plot(Group_Results.TL_group_filt_mean,'k.','MarkerSize',15); hold on;
-
-for i=1:size(Group_Parameters.TL_group_filt,1)
-    s=scatter(1:size(Group_Parameters.TL_group_filt,2),Group_Parameters.TL_group_filt(i,:),'k','filled','MarkerEdgeAlpha',0.1);
-    s.MarkerFaceAlpha = 0.1;
-    hold on;
-end
-
-xlabel('Block','FontName','Arial','FontSize',12)
-ylabel('Total Learning','FontName','Arial','FontSize',12);
-ylim([-1 1])
-xlim([0 length(Group_Results.TL_group_filt_mean)]);
-yline(0);
-
-%% Grafico completo
-
-subplot(1,4,4)
-
-%mogs
-    %error estandar
-    x_vector = [1:length(Group_Results.mogs_group_filt_mean), fliplr(1:length(Group_Results.mogs_group_filt_mean))];
-    patch = fill(x_vector, [Group_Results.mogs_group_filt_mean + Group_Results.mogs_group_filt_std , fliplr(Group_Results.mogs_group_filt_mean - Group_Results.mogs_group_filt_std)], [243 169 114]./255);
-    set(patch, 'edgecolor', 'none');
-    set(patch, 'FaceAlpha', 0.3);
-    hold on;
-    %media
-    plot(Group_Results.mogs_group_filt_mean,'r','LineWidth',0.5);
-%mongs
-
-  %error estandar
-    x_vector = [1:length(Group_Results.mongs_group_filt_mean), fliplr(1:length(Group_Results.mongs_group_filt_mean))];
-    patch = fill(x_vector, [Group_Results.mongs_group_filt_mean + Group_Results.mongs_group_filt_std , fliplr(Group_Results.mongs_group_filt_mean - Group_Results.mongs_group_filt_std)],[128 193 219]./255);
-    set(patch, 'edgecolor', 'none');
-    set(patch, 'FaceAlpha', 0.3);
-    hold on;
-    %media
-    plot(Group_Results.mongs_group_filt_mean,'b','LineWidth',0.5);
-
-%Total Learning
-
-    %error estandar
-    x_vector = [1:length(Group_Results.TL_group_filt_mean), fliplr(1:length(Group_Results.TL_group_filt_mean))];
-    patch = fill(x_vector, [Group_Results.TL_group_filt_mean + Group_Results.TL_group_filt_std , fliplr(Group_Results.TL_group_filt_mean - Group_Results.TL_group_filt_std)], [200 200 200]./255);
-    set(patch, 'edgecolor', 'none');
-    set(patch, 'FaceAlpha', 0.5);
-    hold on;
-    
-    %media
-    plot(Group_Results.TL_group_filt_mean,'k','LineWidth',0.5);
-
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    %misma escala q crudo
-    ylim([-1 1])
-    norm_titulo='sin norm';
-else
-    if strcmp(Group_Parameters.flag_tipo_norm,'Z')
-        ylim([-10 10])
-    else %norm 01
-        ylim([-3 3])
+    for i=1:size(Group_Parameters.mogs_group_corr,1)
+        s=scatter(1:size(Group_Parameters.mogs_group_corr,2),Group_Parameters.mogs_group_corr(i,:),'r','filled','MarkerEdgeAlpha',0.1);
+        s.MarkerFaceAlpha = 0.1;
+        hold on;
     end
-    norm_titulo=Group_Parameters.flag_tipo_norm;
-end
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('MOGs','FontName','Arial','FontSize',12);
+    ylim([-1 1])
+    xlim([0 length(Group_Results.mogs_group_corr_mean)]);
     yline(0);
-    xlabel('Blocks')
-    legend('','MOGS','', 'MONGS', '', 'Total Learning')
 
-sgtitle([titulo ' - no acum - Datos filtrados - ' norm_titulo])
-clear x_vector; clear i; clear patch; 
+    %% MONGS no acumulado
 
-saveas(gcf,[path '_MicroGains_filt_Group.' 'fig']);
-saveas(gcf,[path '_MicroGains_filt_Group.' 'png']);
+    Group_Results.mongs_group_corr_mean = nanmean(Group_Parameters.mongs_group_corr,1);                                       
+    Group_Results.mongs_group_corr_std = nanstd(Group_Parameters.mongs_group_corr,0,1)/sqrt(N);    
 
+    subplot(1,4,2)
+    plot(Group_Results.mongs_group_corr_mean,'b.','MarkerSize',15); hold on;
+
+    for i=1:size(Group_Parameters.mongs_group_corr,1)
+        s=scatter(1:size(Group_Parameters.mongs_group_corr,2),Group_Parameters.mongs_group_corr(i,:),'b','filled','MarkerEdgeAlpha',0.1);
+        s.MarkerFaceAlpha = 0.1;
+        hold on;
+    end
+
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('MONGs','FontName','Arial','FontSize',12);
+    ylim([-1 1])
+    xlim([0 length(Group_Results.mongs_group_corr_mean)]);
+    yline(0);
+
+    %% TOTAL LEARNING
+
+    Group_Results.TL_group_corr_mean = nanmean(Group_Parameters.TL_group_corr,1);                                       
+    Group_Results.TL_group_corr_std = nanstd(Group_Parameters.TL_group_corr,0,1)/sqrt(N);  
+
+    subplot(1,4,1)
+    plot(Group_Results.TL_group_corr_mean,'k.','MarkerSize',15); hold on;
+
+    for i=1:size(Group_Parameters.TL_group_corr,1)
+        s=scatter(1:size(Group_Parameters.TL_group_corr,2),Group_Parameters.TL_group_corr(i,:),'k','filled','MarkerEdgeAlpha',0.1);
+        s.MarkerFaceAlpha = 0.1;
+        hold on;
+    end
+
+    xlabel('Block','FontName','Arial','FontSize',12)
+    ylabel('Total Learning','FontName','Arial','FontSize',12);
+    ylim([-1 1])
+    xlim([0 length(Group_Results.TL_group_corr_mean)]);
+    yline(0);
+
+    %% Grafico completo
+
+    subplot(1,4,4)
+
+    %mogs
+        %error estandar
+        x_vector = [1:length(Group_Results.mogs_group_corr_mean), fliplr(1:length(Group_Results.mogs_group_corr_mean))];
+        patch = fill(x_vector, [Group_Results.mogs_group_corr_mean + Group_Results.mogs_group_corr_std , fliplr(Group_Results.mogs_group_corr_mean - Group_Results.mogs_group_corr_std)], [243 169 114]./255);
+        set(patch, 'edgecolor', 'none');
+        set(patch, 'FaceAlpha', 0.3);
+        hold on;
+        %media
+        plot(Group_Results.mogs_group_corr_mean,'r','LineWidth',0.5);
+    %mongs
+
+      %error estandar
+        x_vector = [1:length(Group_Results.mongs_group_corr_mean), fliplr(1:length(Group_Results.mongs_group_corr_mean))];
+        patch = fill(x_vector, [Group_Results.mongs_group_corr_mean + Group_Results.mongs_group_corr_std , fliplr(Group_Results.mongs_group_corr_mean - Group_Results.mongs_group_corr_std)],[128 193 219]./255);
+        set(patch, 'edgecolor', 'none');
+        set(patch, 'FaceAlpha', 0.3);
+        hold on;
+        %media
+        plot(Group_Results.mongs_group_corr_mean,'b','LineWidth',0.5);
+
+    %Total Learning
+
+        %error estandar
+        x_vector = [1:length(Group_Results.TL_group_corr_mean), fliplr(1:length(Group_Results.TL_group_corr_mean))];
+        patch = fill(x_vector, [Group_Results.TL_group_corr_mean + Group_Results.TL_group_corr_std , fliplr(Group_Results.TL_group_corr_mean - Group_Results.TL_group_corr_std)], [200 200 200]./255);
+        set(patch, 'edgecolor', 'none');
+        set(patch, 'FaceAlpha', 0.5);
+        hold on;
+
+        %media
+        plot(Group_Results.TL_group_corr_mean,'k','LineWidth',0.5);
+
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        %misma escala q crudo
+        ylim([-1 1])
+    else
+        if strcmp(Group_Parameters.flag_tipo_norm,'Z')
+            ylim([-10 10])
+        else %norm 01
+            ylim([-3 3])
+        end
+    end
+        yline(0);
+        xlabel('Blocks')
+        legend('','MOGS','', 'MONGS', '', 'Total Learning')
+
+    clear x_vector; clear i; clear patch; 
+
+    saveas(gcf,[path '_MicroGains_corr_Group.' 'fig']);
+    saveas(gcf,[path '_MicroGains_corr_Group.' 'png']);
+end % if si esta corregido
 
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -776,7 +778,7 @@ for i=1:size(Group_Parameters.micro_mogs_group,1)
 end
 
 plot(Group_Results.micro_mogs_group_mean,'k.','MarkerSize',10);
-for j=1:11:length(Group_Results.micro_mogs_group_mean)
+for j=1:(Group_Parameters.cant_SeqBlock-1):length(Group_Results.micro_mogs_group_mean)
      xline(j); hold on;
 end 
 xlabel('Trial','FontName','Arial','FontSize',12)
@@ -798,7 +800,7 @@ for i=1:size(Group_Parameters.micro_mongs_group,1)
 end
 
 plot(Group_Results.micro_mongs_group_mean,'k.','MarkerSize',10);
-for j=1:12:length(Group_Results.micro_mongs_group_mean)
+for j=1:Group_Parameters.cant_SeqBlock:length(Group_Results.micro_mongs_group_mean)
      xline(j); hold on;
 end 
 xlabel('Trial','FontName','Arial','FontSize',12)
@@ -813,8 +815,8 @@ subplot(3,1,3)
 % para que sean comparables mogs y mongs debo agregar un NaN al final de
 % cada bloque de mogs asi ambos tienen 12 elementos en cada bloque
 aux_micro_mogs_mean=[];
-for i=1:11:(length(Group_Results.micro_mogs_group_mean))
-    aux_micro_mogs_mean=[aux_micro_mogs_mean Group_Results.micro_mogs_group_mean(i:(i-1)+11) NaN];
+for i=1:(Group_Parameters.cant_SeqBlock-1):(length(Group_Results.micro_mogs_group_mean))
+    aux_micro_mogs_mean=[aux_micro_mogs_mean Group_Results.micro_mogs_group_mean(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) NaN];
 end
 
 %mogs
@@ -825,9 +827,9 @@ end
 %     set(patch, 'FaceAlpha', 0.3);
 %     hold on;
     nan_cont=0;
-    for i=1:11:length(Group_Results.micro_mogs_group_mean)
-        x_vector = [(i+nan_cont):((i+nan_cont-1)+11), fliplr((i+nan_cont):((i+nan_cont-1)+11))];
-        patch = fill(x_vector, [Group_Results.micro_mogs_group_mean(i:(i-1)+11) + Group_Results.micro_mogs_group_std(i:(i-1)+11) , fliplr(Group_Results.micro_mogs_group_mean(i:(i-1)+11) - Group_Results.micro_mogs_group_std(i:(i-1)+11))], [243 169 114]./255);
+    for i=1:(Group_Parameters.cant_SeqBlock-1):length(Group_Results.micro_mogs_group_mean)
+        x_vector = [(i+nan_cont):((i+nan_cont-1)+(Group_Parameters.cant_SeqBlock-1)), fliplr((i+nan_cont):((i+nan_cont-1)+(Group_Parameters.cant_SeqBlock-1)))];
+        patch = fill(x_vector, [Group_Results.micro_mogs_group_mean(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) + Group_Results.micro_mogs_group_std(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) , fliplr(Group_Results.micro_mogs_group_mean(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) - Group_Results.micro_mogs_group_std(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)))], [243 169 114]./255);
         set(patch, 'edgecolor', 'none');
         set(patch, 'FaceAlpha', 0.3);
         hold on;
@@ -871,7 +873,7 @@ for i=1:size(Group_Parameters.micro_mogs_acumulado_group,1)
 end
 
 plot(Group_Results.micro_mogs_acumulado_group_mean,'k.','MarkerSize',10);
-for j=1:11:length(Group_Results.micro_mogs_acumulado_group_mean)
+for j=1:(Group_Parameters.cant_SeqBlock-1):length(Group_Results.micro_mogs_acumulado_group_mean)
      xline(j); hold on;
 end 
 xlabel('Trial','FontName','Arial','FontSize',12)
@@ -893,7 +895,7 @@ for i=1:size(Group_Parameters.micro_mongs_acumulado_group,1)
 end
 
 plot(Group_Results.micro_mongs_acumulado_group_mean,'k.','MarkerSize',10);
-for j=1:12:length(Group_Results.micro_mongs_acumulado_group_mean)
+for j=1:Group_Parameters.cant_SeqBlock:length(Group_Results.micro_mongs_acumulado_group_mean)
      xline(j); hold on;
 end 
 xlabel('Trial','FontName','Arial','FontSize',12)
@@ -908,8 +910,8 @@ subplot(3,1,3)
 % para que sean comparables mogs y mongs debo agregar un NaN al final de
 % cada bloque de mogs asi ambos tienen 12 elementos en cada bloque
 aux_micro_mogs_mean=[];
-for i=1:11:(length(Group_Results.micro_mogs_acumulado_group_mean))
-    aux_micro_mogs_mean=[aux_micro_mogs_mean Group_Results.micro_mogs_acumulado_group_mean(i:(i-1)+11) NaN];
+for i=1:(Group_Parameters.cant_SeqBlock-1):(length(Group_Results.micro_mogs_acumulado_group_mean))
+    aux_micro_mogs_mean=[aux_micro_mogs_mean Group_Results.micro_mogs_acumulado_group_mean(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) NaN];
 end
 
 %mogs
@@ -920,10 +922,10 @@ end
 %     set(patch, 'FaceAlpha', 0.3);
 %     hold on;
     nan_cont=0;
-    for i=1:11:length(Group_Results.micro_mogs_acumulado_group_mean)
-        x_vector = [(i+nan_cont):((i+nan_cont-1)+11), fliplr((i+nan_cont):((i+nan_cont-1)+11))];
-        patch = fill(x_vector, [Group_Results.micro_mogs_acumulado_group_mean(i:(i-1)+11) + Group_Results.micro_mogs_acumulado_group_std(i:(i-1)+11) , ...
-            fliplr(Group_Results.micro_mogs_acumulado_group_mean(i:(i-1)+11) - Group_Results.micro_mogs_acumulado_group_std(i:(i-1)+11))], [243 169 114]./255);
+    for i=1:(Group_Parameters.cant_SeqBlock-1):length(Group_Results.micro_mogs_acumulado_group_mean)
+        x_vector = [(i+nan_cont):((i+nan_cont-1)+(Group_Parameters.cant_SeqBlock-1)), fliplr((i+nan_cont):((i+nan_cont-1)+(Group_Parameters.cant_SeqBlock-1)))];
+        patch = fill(x_vector, [Group_Results.micro_mogs_acumulado_group_mean(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) + Group_Results.micro_mogs_acumulado_group_std(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) , ...
+            fliplr(Group_Results.micro_mogs_acumulado_group_mean(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) - Group_Results.micro_mogs_acumulado_group_std(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)))], [243 169 114]./255);
         set(patch, 'edgecolor', 'none');
         set(patch, 'FaceAlpha', 0.3);
         hold on;
@@ -956,235 +958,238 @@ saveas(gcf,[path '_MicroMicroGains_acum_crudo_Group.' 'png']);
 %%%             Micro Micro Gains as Filtered data                      %%%
 %%%             non acumulative                                         %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-figure(10); set(gcf,'Color','white'); box OFF; hold on; %sgtitle([titulo ' - filt - no acum'])
+if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
 
-%MICRO MOGS no acumulado
-subplot(3,1,1)
-Group_Results.micro_mogs_group_mean_filt=nanmean(Group_Parameters.micro_mogs_group_filt);
-Group_Results.micro_mogs_group_std_filt=nanstd(Group_Parameters.micro_mogs_group_filt)/sqrt(N); %error estandar
+    figure(10); set(gcf,'Color','white'); box OFF; hold on; sgtitle([titulo ' - ' Group_Parameters.titulo_analisis])
 
-for i=1:size(Group_Parameters.micro_mogs_group_filt,1)
-    s=scatter(1:size(Group_Parameters.micro_mogs_group_filt,2),Group_Parameters.micro_mogs_group_filt(i,:),'r','filled','MarkerEdgeAlpha',0.1);
-    s.MarkerFaceAlpha = 0.4;
-    hold on;
-end
+    %MICRO MOGS no acumulado
+    subplot(3,1,1)
+    Group_Results.micro_mogs_group_mean_corr=nanmean(Group_Parameters.micro_mogs_group_corr);
+    Group_Results.micro_mogs_group_std_corr=nanstd(Group_Parameters.micro_mogs_group_corr)/sqrt(N); %error estandar
 
-plot(Group_Results.micro_mogs_group_mean_filt,'k.','MarkerSize',10);
-for j=1:11:length(Group_Results.micro_mogs_group_mean_filt)
-     xline(j); hold on;
-end 
-xlabel('Trial','FontName','Arial','FontSize',12)
-ylabel('Micro MOGs','FontName','Arial','FontSize',12);
-xlim([0 length(Group_Results.micro_mogs_group_mean_filt)]);
+    for i=1:size(Group_Parameters.micro_mogs_group_corr,1)
+        s=scatter(1:size(Group_Parameters.micro_mogs_group_corr,2),Group_Parameters.micro_mogs_group_corr(i,:),'r','filled','MarkerEdgeAlpha',0.1);
+        s.MarkerFaceAlpha = 0.4;
+        hold on;
+    end
 
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    ylim([-1 1])
-else %aca solo hay normalización Zscore
-    ylim([-5 5])
-end
-yline(0);
+    plot(Group_Results.micro_mogs_group_mean_corr,'k.','MarkerSize',10);
+    for j=1:(Group_Parameters.cant_SeqBlock-1):length(Group_Results.micro_mogs_group_mean_corr)
+         xline(j); hold on;
+    end 
+    xlabel('Trial','FontName','Arial','FontSize',12)
+    ylabel('Micro MOGs','FontName','Arial','FontSize',12);
+    xlim([0 length(Group_Results.micro_mogs_group_mean_corr)]);
+
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        ylim([-1 1])
+    else %aca solo hay normalización Zscore
+        ylim([-5 5])
+    end
+    yline(0);
 
 
-% MICRO MONGS no acumulado
-subplot(3,1,2)
-Group_Results.micro_mongs_group_mean_filt=nanmean(Group_Parameters.micro_mongs_group_filt);
-Group_Results.micro_mongs_group_std_filt=nanstd(Group_Parameters.micro_mongs_group_filt)/sqrt(N); %error estandar
+    % MICRO MONGS no acumulado
+    subplot(3,1,2)
+    Group_Results.micro_mongs_group_mean_corr=nanmean(Group_Parameters.micro_mongs_group_corr);
+    Group_Results.micro_mongs_group_std_corr=nanstd(Group_Parameters.micro_mongs_group_corr)/sqrt(N); %error estandar
 
-for i=1:size(Group_Parameters.micro_mongs_group,1)
-    s=scatter(1:size(Group_Parameters.micro_mongs_group_filt,2),Group_Parameters.micro_mongs_group_filt(i,:),'b','filled','MarkerEdgeAlpha',0.1);
-    s.MarkerFaceAlpha = 0.4;
-    hold on;
-end
+    for i=1:size(Group_Parameters.micro_mongs_group,1)
+        s=scatter(1:size(Group_Parameters.micro_mongs_group_corr,2),Group_Parameters.micro_mongs_group_corr(i,:),'b','filled','MarkerEdgeAlpha',0.1);
+        s.MarkerFaceAlpha = 0.4;
+        hold on;
+    end
 
-plot(Group_Results.micro_mongs_group_mean_filt,'k.','MarkerSize',10);
-for j=1:12:length(Group_Results.micro_mongs_group_mean_filt)
-     xline(j); hold on;
-end 
-xlabel('Trial','FontName','Arial','FontSize',12)
-ylabel('Micro MONGs','FontName','Arial','FontSize',12);
-xlim([0 length(Group_Results.micro_mongs_group_mean_filt)]);
+    plot(Group_Results.micro_mongs_group_mean_corr,'k.','MarkerSize',10);
+    for j=1:Group_Parameters.cant_SeqBlock:length(Group_Results.micro_mongs_group_mean_corr)
+         xline(j); hold on;
+    end 
+    xlabel('Trial','FontName','Arial','FontSize',12)
+    ylabel('Micro MONGs','FontName','Arial','FontSize',12);
+    xlim([0 length(Group_Results.micro_mongs_group_mean_corr)]);
 
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    ylim([-1 1])
-else %aca solo hay normalización Zscore
-    ylim([-5 5])
-end
-yline(0);
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        ylim([-1 1])
+    else %aca solo hay normalización Zscore
+        ylim([-5 5])
+    end
+    yline(0);
 
-% GRAFICO COMPLETO No acumulado
-subplot(3,1,3)
+    % GRAFICO COMPLETO No acumulado
+    subplot(3,1,3)
 
-% para que sean comparables mogs y mongs debo agregar un NaN al final de
-% cada bloque de mogs asi ambos tienen 12 elementos en cada bloque
-aux_micro_mogs_mean=[];
-for i=1:11:(length(Group_Results.micro_mogs_group_mean_filt))
-    aux_micro_mogs_mean=[aux_micro_mogs_mean Group_Results.micro_mogs_group_mean_filt(i:(i-1)+11) NaN];
-end
+    % para que sean comparables mogs y mongs debo agregar un NaN al final de
+    % cada bloque de mogs asi ambos tienen 12 elementos en cada bloque
+    aux_micro_mogs_mean=[];
+    for i=1:(Group_Parameters.cant_SeqBlock-1):(length(Group_Results.micro_mogs_group_mean_corr))
+        aux_micro_mogs_mean=[aux_micro_mogs_mean Group_Results.micro_mogs_group_mean_corr(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) NaN];
+    end
 
-%mogs
-    %error estandar -- GC 28/02/23
-%     x_vector = [1:length(Group_Results.micro_mogs_group_mean_filt), fliplr(1:length(Group_Results.micro_mogs_group_mean_filt))];
-%     patch = fill(x_vector, [Group_Results.micro_mogs_group_mean_filt + Group_Results.micro_mogs_group_std_filt , fliplr(Group_Results.micro_mogs_group_mean_filt - Group_Results.micro_mogs_group_std_filt)], [243 169 114]./255);
-%     set(patch, 'edgecolor', 'none');
-%     set(patch, 'FaceAlpha', 0.3);
-%     hold on;
-    nan_cont=0;
-    for i=1:11:length(Group_Results.micro_mogs_group_mean_filt)
-        x_vector = [(i+nan_cont):((i+nan_cont-1)+11), fliplr((i+nan_cont):((i+nan_cont-1)+11))];
-        patch = fill(x_vector, [Group_Results.micro_mogs_group_mean_filt(i:(i-1)+11) + Group_Results.micro_mogs_group_std_filt(i:(i-1)+11) , ...
-            fliplr(Group_Results.micro_mogs_group_mean_filt(i:(i-1)+11) - Group_Results.micro_mogs_group_std_filt(i:(i-1)+11))], [243 169 114]./255);
+    %mogs
+        %error estandar -- GC 28/02/23
+    %     x_vector = [1:length(Group_Results.micro_mogs_group_mean_corr), fliplr(1:length(Group_Results.micro_mogs_group_mean_corr))];
+    %     patch = fill(x_vector, [Group_Results.micro_mogs_group_mean_corr + Group_Results.micro_mogs_group_std_corr , fliplr(Group_Results.micro_mogs_group_mean_corr - Group_Results.micro_mogs_group_std_corr)], [243 169 114]./255);
+    %     set(patch, 'edgecolor', 'none');
+    %     set(patch, 'FaceAlpha', 0.3);
+    %     hold on;
+        nan_cont=0;
+        for i=1:(Group_Parameters.cant_SeqBlock-1):length(Group_Results.micro_mogs_group_mean_corr)
+            x_vector = [(i+nan_cont):((i+nan_cont-1)+(Group_Parameters.cant_SeqBlock-1)), fliplr((i+nan_cont):((i+nan_cont-1)+(Group_Parameters.cant_SeqBlock-1)))];
+            patch = fill(x_vector, [Group_Results.micro_mogs_group_mean_corr(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) + Group_Results.micro_mogs_group_std_corr(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) , ...
+                fliplr(Group_Results.micro_mogs_group_mean_corr(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) - Group_Results.micro_mogs_group_std_corr(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)))], [243 169 114]./255);
+            set(patch, 'edgecolor', 'none');
+            set(patch, 'FaceAlpha', 0.3);
+            hold on;
+            nan_cont=nan_cont+1;
+        end
+        %media
+        plot(aux_micro_mogs_mean,'r','LineWidth',0.5);
+    %mongs
+
+      %error estandar
+        x_vector = [1:length(Group_Results.micro_mongs_group_mean_corr), fliplr(1:length(Group_Results.micro_mongs_group_mean_corr))];
+        patch = fill(x_vector, [Group_Results.micro_mongs_group_mean_corr + Group_Results.micro_mongs_group_std_corr , fliplr(Group_Results.micro_mongs_group_mean_corr - Group_Results.micro_mongs_group_std_corr)],[128 193 219]./255);
         set(patch, 'edgecolor', 'none');
         set(patch, 'FaceAlpha', 0.3);
         hold on;
-        nan_cont=nan_cont+1;
+        %media
+        plot(Group_Results.micro_mongs_group_mean_corr,'b','LineWidth',0.5);
+
+    %GC 18/1/23    
+    if Group_Parameters.flag_norm==0
+        ylim([-0.3 0.3])
+        norm_titulo='sin norm';
+    else %aca solo hay normalización Zscore
+        ylim([-1.5 1.5])
+        norm_titulo='norm Z';
     end
-    %media
-    plot(aux_micro_mogs_mean,'r','LineWidth',0.5);
-%mongs
-
-  %error estandar
-    x_vector = [1:length(Group_Results.micro_mongs_group_mean_filt), fliplr(1:length(Group_Results.micro_mongs_group_mean_filt))];
-    patch = fill(x_vector, [Group_Results.micro_mongs_group_mean_filt + Group_Results.micro_mongs_group_std_filt , fliplr(Group_Results.micro_mongs_group_mean_filt - Group_Results.micro_mongs_group_std_filt)],[128 193 219]./255);
-    set(patch, 'edgecolor', 'none');
-    set(patch, 'FaceAlpha', 0.3);
-    hold on;
-    %media
-    plot(Group_Results.micro_mongs_group_mean_filt,'b','LineWidth',0.5);
-
-%GC 18/1/23    
-if Group_Parameters.flag_norm==0
-    ylim([-0.3 0.3])
-    norm_titulo='sin norm';
-else %aca solo hay normalización Zscore
-    ylim([-1.5 1.5])
-    norm_titulo='norm Z';
-end
-yline(0)
-sgtitle([titulo ' - filt - no acum - ' norm_titulo])
-    
-clear aux_micro_mogs_mean; clear norm_titulo; clear nan_cont;
-saveas(gcf,[path '_MicroMicroGains_flit_Group.' 'fig']);
-saveas(gcf,[path '_MicroMicroGains_filt_Group.' 'png']);
-
+    yline(0)
+    sgtitle([titulo ' - ' Group_Parameters.titulo_filt ' - ' norm_titulo ' - no acum' ])
+    clear aux_micro_mogs_mean; clear norm_titulo; clear nan_cont;
+    saveas(gcf,[path '_MicroMicroGains_flit_Group.' 'fig']);
+    saveas(gcf,[path '_MicroMicroGains_corr_Group.' 'png']);
+end %if si esta corregido
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                             FIGURE 11                               %%%
 %%%                 Micro Micro Gains as filtered data                  %%%
 %%%                 Acumulative                                         %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-figure(11); set(gcf,'Color','white'); box OFF; hold on; %sgtitle([titulo ' - filt - acum'])
+if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
 
-%MICRO MOGS acumulado
-subplot(3,1,1)
-Group_Results.micro_mogs_acumulado_group_mean_filt=nanmean(Group_Parameters.micro_mogs_acumulado_group_filt);
-Group_Results.micro_mogs_acumulado_group_std_filt=nanstd(Group_Parameters.micro_mogs_acumulado_group_filt)/sqrt(N); %error estandar
+    figure(11); set(gcf,'Color','white'); box OFF; hold on; 
 
-for i=1:size(Group_Parameters.micro_mogs_acumulado_group_filt,1)
-    s=scatter(1:size(Group_Parameters.micro_mogs_acumulado_group_filt,2),Group_Parameters.micro_mogs_acumulado_group_filt(i,:),'r','filled','MarkerEdgeAlpha',0.1);
-    s.MarkerFaceAlpha = 0.4;
-    hold on;
-end
+    %MICRO MOGS acumulado
+    subplot(3,1,1)
+    Group_Results.micro_mogs_acumulado_group_mean_corr=nanmean(Group_Parameters.micro_mogs_acumulado_group_corr);
+    Group_Results.micro_mogs_acumulado_group_std_corr=nanstd(Group_Parameters.micro_mogs_acumulado_group_corr)/sqrt(N); %error estandar
 
-plot(Group_Results.micro_mogs_acumulado_group_mean_filt,'k.','MarkerSize',10);
-for j=1:11:length(Group_Results.micro_mogs_acumulado_group_mean_filt)
-     xline(j); hold on;
-end 
-xlabel('Trial','FontName','Arial','FontSize',12)
-ylabel('Micro MOGs','FontName','Arial','FontSize',12);
-xlim([0 length(Group_Results.micro_mogs_acumulado_group_mean_filt)]);
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    ylim([-2 2])
-else %aca solo hay normalización Zscore
-    ylim([-10 10])
-end
-yline(0);
+    for i=1:size(Group_Parameters.micro_mogs_acumulado_group_corr,1)
+        s=scatter(1:size(Group_Parameters.micro_mogs_acumulado_group_corr,2),Group_Parameters.micro_mogs_acumulado_group_corr(i,:),'r','filled','MarkerEdgeAlpha',0.1);
+        s.MarkerFaceAlpha = 0.4;
+        hold on;
+    end
+
+    plot(Group_Results.micro_mogs_acumulado_group_mean_corr,'k.','MarkerSize',10);
+    for j=1:(Group_Parameters.cant_SeqBlock-1):length(Group_Results.micro_mogs_acumulado_group_mean_corr)
+         xline(j); hold on;
+    end 
+    xlabel('Trial','FontName','Arial','FontSize',12)
+    ylabel('Micro MOGs','FontName','Arial','FontSize',12);
+    xlim([0 length(Group_Results.micro_mogs_acumulado_group_mean_corr)]);
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        ylim([-2 2])
+    else %aca solo hay normalización Zscore
+        ylim([-10 10])
+    end
+    yline(0);
 
 
-% MICRO MONGS acumulado
-subplot(3,1,2)
-Group_Results.micro_mongs_acumulado_group_mean_filt=nanmean(Group_Parameters.micro_mongs_acumulado_group_filt);
-Group_Results.micro_mongs_acumulado_group_std_filt=nanstd(Group_Parameters.micro_mongs_acumulado_group_filt)/sqrt(N); %error estandar
+    % MICRO MONGS acumulado
+    subplot(3,1,2)
+    Group_Results.micro_mongs_acumulado_group_mean_corr=nanmean(Group_Parameters.micro_mongs_acumulado_group_corr);
+    Group_Results.micro_mongs_acumulado_group_std_corr=nanstd(Group_Parameters.micro_mongs_acumulado_group_corr)/sqrt(N); %error estandar
 
-for i=1:size(Group_Parameters.micro_mongs_acumulado_group_filt,1)
-    s=scatter(1:size(Group_Parameters.micro_mongs_acumulado_group_filt,2),Group_Parameters.micro_mongs_acumulado_group_filt(i,:),'b','filled','MarkerEdgeAlpha',0.1);
-    s.MarkerFaceAlpha = 0.4;
-    hold on;
-end
+    for i=1:size(Group_Parameters.micro_mongs_acumulado_group_corr,1)
+        s=scatter(1:size(Group_Parameters.micro_mongs_acumulado_group_corr,2),Group_Parameters.micro_mongs_acumulado_group_corr(i,:),'b','filled','MarkerEdgeAlpha',0.1);
+        s.MarkerFaceAlpha = 0.4;
+        hold on;
+    end
 
-plot(Group_Results.micro_mongs_acumulado_group_mean_filt,'k.','MarkerSize',10);
-for j=1:12:length(Group_Results.micro_mongs_acumulado_group_mean_filt)
-     xline(j); hold on;
-end 
-xlabel('Trial','FontName','Arial','FontSize',12)
-ylabel('Micro MONGs','FontName','Arial','FontSize',12);
-xlim([0 length(Group_Results.micro_mongs_acumulado_group_mean_filt)]);
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    ylim([-2 2])
-else %aca solo hay normalización Zscore
-    ylim([-10 10])
-end
-yline(0);
+    plot(Group_Results.micro_mongs_acumulado_group_mean_corr,'k.','MarkerSize',10);
+    for j=1:Group_Parameters.cant_SeqBlock:length(Group_Results.micro_mongs_acumulado_group_mean_corr)
+         xline(j); hold on;
+    end 
+    xlabel('Trial','FontName','Arial','FontSize',12)
+    ylabel('Micro MONGs','FontName','Arial','FontSize',12);
+    xlim([0 length(Group_Results.micro_mongs_acumulado_group_mean_corr)]);
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        ylim([-2 2])
+    else %aca solo hay normalización Zscore
+        ylim([-10 10])
+    end
+    yline(0);
 
-% GRAFICO COMPLETO acumulado
-subplot(3,1,3)
+    % GRAFICO COMPLETO acumulado
+    subplot(3,1,3)
 
-% para que sean comparables mogs y mongs debo agregar un NaN al final de
-% cada bloque de mogs asi ambos tienen 12 elementos en cada bloque
-aux_micro_mogs_mean=[];
-for i=1:11:(length(Group_Results.micro_mogs_acumulado_group_mean_filt))
-    aux_micro_mogs_mean=[aux_micro_mogs_mean Group_Results.micro_mogs_acumulado_group_mean_filt(i:(i-1)+11) NaN];
-end
+    % para que sean comparables mogs y mongs debo agregar un NaN al final de
+    % cada bloque de mogs asi ambos tienen 12 elementos en cada bloque
+    aux_micro_mogs_mean=[];
+    for i=1:(Group_Parameters.cant_SeqBlock-1):(length(Group_Results.micro_mogs_acumulado_group_mean_corr))
+        aux_micro_mogs_mean=[aux_micro_mogs_mean Group_Results.micro_mogs_acumulado_group_mean_corr(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) NaN];
+    end
 
-%mogs
-    %error estandar -- GC 28/02/23
-%     x_vector = [1:length(Group_Results.micro_mogs_acumulado_group_mean_filt), fliplr(1:length(Group_Results.micro_mogs_acumulado_group_mean_filt))];
-%     patch = fill(x_vector, [Group_Results.micro_mogs_acumulado_group_mean_filt + Group_Results.micro_mogs_acumulado_group_std_filt , fliplr(Group_Results.micro_mogs_acumulado_group_mean_filt - Group_Results.micro_mogs_acumulado_group_std_filt)], [243 169 114]./255);
-%     set(patch, 'edgecolor', 'none');
-%     set(patch, 'FaceAlpha', 0.3);
-%     hold on;
-    nan_cont=0;
-    for i=1:11:length(Group_Results.micro_mogs_acumulado_group_mean_filt)
-        x_vector = [(i+nan_cont):((i+nan_cont-1)+11), fliplr((i+nan_cont):((i+nan_cont-1)+11))];
-        patch = fill(x_vector, [Group_Results.micro_mogs_acumulado_group_mean_filt(i:(i-1)+11) + Group_Results.micro_mogs_acumulado_group_std_filt(i:(i-1)+11) , ...
-            fliplr(Group_Results.micro_mogs_acumulado_group_mean_filt(i:(i-1)+11) - Group_Results.micro_mogs_acumulado_group_std_filt(i:(i-1)+11))], [243 169 114]./255);
+    %mogs
+        %error estandar -- GC 28/02/23
+    %     x_vector = [1:length(Group_Results.micro_mogs_acumulado_group_mean_corr), fliplr(1:length(Group_Results.micro_mogs_acumulado_group_mean_corr))];
+    %     patch = fill(x_vector, [Group_Results.micro_mogs_acumulado_group_mean_corr + Group_Results.micro_mogs_acumulado_group_std_corr , fliplr(Group_Results.micro_mogs_acumulado_group_mean_corr - Group_Results.micro_mogs_acumulado_group_std_corr)], [243 169 114]./255);
+    %     set(patch, 'edgecolor', 'none');
+    %     set(patch, 'FaceAlpha', 0.3);
+    %     hold on;
+        nan_cont=0;
+        for i=1:(Group_Parameters.cant_SeqBlock-1):length(Group_Results.micro_mogs_acumulado_group_mean_corr)
+            x_vector = [(i+nan_cont):((i+nan_cont-1)+(Group_Parameters.cant_SeqBlock-1)), fliplr((i+nan_cont):((i+nan_cont-1)+(Group_Parameters.cant_SeqBlock-1)))];
+            patch = fill(x_vector, [Group_Results.micro_mogs_acumulado_group_mean_corr(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) + Group_Results.micro_mogs_acumulado_group_std_corr(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) , ...
+                fliplr(Group_Results.micro_mogs_acumulado_group_mean_corr(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)) - Group_Results.micro_mogs_acumulado_group_std_corr(i:(i-1)+(Group_Parameters.cant_SeqBlock-1)))], [243 169 114]./255);
+            set(patch, 'edgecolor', 'none');
+            set(patch, 'FaceAlpha', 0.3);
+            hold on;
+            nan_cont=nan_cont+1;
+        end
+        %media
+        plot(aux_micro_mogs_mean,'r','LineWidth',0.5);
+    %mongs
+
+      %error estandar
+        x_vector = [1:length(Group_Results.micro_mongs_acumulado_group_mean_corr), fliplr(1:length(Group_Results.micro_mongs_acumulado_group_mean_corr))];
+        patch = fill(x_vector, [Group_Results.micro_mongs_acumulado_group_mean_corr + Group_Results.micro_mongs_acumulado_group_std_corr , fliplr(Group_Results.micro_mongs_acumulado_group_mean_corr - Group_Results.micro_mongs_acumulado_group_std_corr)],[128 193 219]./255);
         set(patch, 'edgecolor', 'none');
         set(patch, 'FaceAlpha', 0.3);
         hold on;
-        nan_cont=nan_cont+1;
+        %media
+        plot(Group_Results.micro_mongs_acumulado_group_mean_corr,'b','LineWidth',0.5);
+
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        ylim([-0.5 0.5])
+        norm_titulo='sin norm';
+    else %aca solo hay normalización Zscore
+        ylim([-3 3])
+        norm_titulo='norm Z';
     end
-    %media
-    plot(aux_micro_mogs_mean,'r','LineWidth',0.5);
-%mongs
+    yline(0)
+    
+    sgtitle([titulo ' - ' Group_Parameters.titulo_filt ' - ' norm_titulo ' - acum' ])
+    clear aux_micro_mogs_mean; clear norm_titulo; clear nan_cont;
+    saveas(gcf,[path '_MicroMicroGains_acum_corr_Group.' 'fig']);
+    saveas(gcf,[path '_MicroMicroGains_acum_corr_Group.' 'png']);
 
-  %error estandar
-    x_vector = [1:length(Group_Results.micro_mongs_acumulado_group_mean_filt), fliplr(1:length(Group_Results.micro_mongs_acumulado_group_mean_filt))];
-    patch = fill(x_vector, [Group_Results.micro_mongs_acumulado_group_mean_filt + Group_Results.micro_mongs_acumulado_group_std_filt , fliplr(Group_Results.micro_mongs_acumulado_group_mean_filt - Group_Results.micro_mongs_acumulado_group_std_filt)],[128 193 219]./255);
-    set(patch, 'edgecolor', 'none');
-    set(patch, 'FaceAlpha', 0.3);
-    hold on;
-    %media
-    plot(Group_Results.micro_mongs_acumulado_group_mean_filt,'b','LineWidth',0.5);
-
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    ylim([-0.5 0.5])
-    norm_titulo='sin norm';
-else %aca solo hay normalización Zscore
-    ylim([-3 3])
-    norm_titulo='norm Z';
-end
-yline(0)
-sgtitle([titulo ' - filt - acum - ' norm_titulo])
-
-clear aux_micro_mogs_mean; clear norm_titulo; clear nan_cont;
-saveas(gcf,[path '_MicroMicroGains_acum_filt_Group.' 'fig']);
-saveas(gcf,[path '_MicroMicroGains_acum_filt_Group.' 'png']);
-
-
+end %si esta corregido
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                         Figure 12                                   %%%
@@ -1194,70 +1199,72 @@ saveas(gcf,[path '_MicroMicroGains_acum_filt_Group.' 'png']);
 %%% This plot is similar to a learning curve but instead of separating  %%%
 %%% blocks it separates sequences. It allows to see the MicroMicro Gains%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-figure(12); set(gcf,'Color','white'); box OFF; hold on; sgtitle(titulo)
-
-Group_Results.interkey_mat_mean=nanmean(Group_Parameters.interkey_mat);
-Group_Results.interkey_mat_std=nanstd(Group_Parameters.interkey_mat)/sqrt(N); %error estandar
-
-subplot(2,1,1)
-barra=max(Group_Results.interkey_mat_mean,[],'all')+0.1;
-for j=1:4:size(Group_Results.interkey_mat_mean,2)
-    %error estandar
-    x_vector = [j:j+3, fliplr(j:j+3)];
-    x_vector2=[Group_Results.interkey_mat_mean(j:j+3)+Group_Results.interkey_mat_std(j:j+3),fliplr(Group_Results.interkey_mat_mean(j:j+3)-Group_Results.interkey_mat_std(j:j+3))];
-    patch = fill(x_vector, x_vector2, [128 193 219]./255);
-    set(patch, 'edgecolor', 'none');
-    set(patch, 'FaceAlpha', 1);
-    hold on;
-    %secuencia
-    plot(j:j+3,Group_Results.interkey_mat_mean(:,j:j+3),'k-'); hold on;
-    %barras de ITI
-    if mod(j-1,48)== 0 %si j cae en un rest hay que poner la barra de otro color. Hay 48= 4 transiciones x 12 secuencias
-        bar(j-4+3.5,barra,1,'FaceColor',[128 193 219]./255,'EdgeColor',[128 193 219]./255);
-        hold on;
-    end
-     bar(j+3.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
-     hold on;
-
-end
-xlabel('transitions');
-ylabel('time [s]');
-yline(0)
-title('Raw')
-clear x_vector; clear x_vector2; clear patch; clear j;
-
-Group_Results.interkey_mat_mean_filt=nanmean(Group_Parameters.interkey_mat_filt);
-Group_Results.interkey_mat_std_filt=nanstd(Group_Parameters.interkey_mat_filt)/sqrt(N); %error estandar
-
-subplot(2,1,2)
-barra=max(Group_Results.interkey_mat_mean_filt,[],'all')+0.1;
-for j=1:4:size(Group_Results.interkey_mat_mean_filt,2)
-    %error estandar
-    x_vector = [j:j+3, fliplr(j:j+3)];
-    x_vector2=[Group_Results.interkey_mat_mean_filt(j:j+3)+Group_Results.interkey_mat_std_filt(j:j+3),fliplr(Group_Results.interkey_mat_mean_filt(j:j+3)-Group_Results.interkey_mat_std_filt(j:j+3))];
-    patch = fill(x_vector, x_vector2, [128 193 219]./255);
-    set(patch, 'edgecolor', 'none');
-    set(patch, 'FaceAlpha', 1);
-    hold on;
-    %secuencia
-    plot(j:j+3,Group_Results.interkey_mat_mean_filt(:,j:j+3),'k-'); hold on;
-    %barras de ITI
-    if mod(j-1,48)== 0 %si j cae en un rest hay que poner la barra de otro color. Hay 48= 4 transiciones x 12 secuencias
-        bar(j-4+3.5,barra,1,'FaceColor',[128 193 219]./255,'EdgeColor',[128 193 219]./255);
-        hold on;
-    end
-     bar(j+3.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
-     hold on;
-
-end
-xlabel('transitions');
-ylabel('time [s]');
-yline(0)
-title('Filt')
-
-%%
-saveas(gcf,[path 'Curva_seq_Group.' 'fig']);
-saveas(gcf,[path 'Curva_seq_Group.' 'png']);
+% figure(12); set(gcf,'Color','white'); box OFF; hold on; sgtitle(titulo)
+% 
+% Group_Results.interkey_mat_mean=nanmean(Group_Parameters.interkey_mat);
+% Group_Results.interkey_mat_std=nanstd(Group_Parameters.interkey_mat)/sqrt(N); %error estandar
+% if Group_Parameters.flag_filt==1
+%     subplot(2,1,1)
+% end
+% barra=max(Group_Results.interkey_mat_mean,[],'all')+0.1;
+% for j=1:4:size(Group_Results.interkey_mat_mean,2)
+%     %error estandar
+%     x_vector = [j:j+3, fliplr(j:j+3)];
+%     x_vector2=[Group_Results.interkey_mat_mean(j:j+3)+Group_Results.interkey_mat_std(j:j+3),fliplr(Group_Results.interkey_mat_mean(j:j+3)-Group_Results.interkey_mat_std(j:j+3))];
+%     patch = fill(x_vector, x_vector2, [128 193 219]./255);
+%     set(patch, 'edgecolor', 'none');
+%     set(patch, 'FaceAlpha', 1);
+%     hold on;
+%     %secuencia
+%     plot(j:j+3,Group_Results.interkey_mat_mean(:,j:j+3),'k-'); hold on;
+%     %barras de ITI
+%     if mod(j-1,48)== 0 %si j cae en un rest hay que poner la barra de otro color. Hay 48= 4 transiciones x 12 secuencias
+%         bar(j-4+3.5,barra,1,'FaceColor',[128 193 219]./255,'EdgeColor',[128 193 219]./255);
+%         hold on;
+%     end
+%      bar(j+3.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
+%      hold on;
+% 
+% end
+% xlabel('transitions');
+% ylabel('time [s]');
+% yline(0)
+% clear x_vector; clear x_vector2; clear patch; clear j;
+% 
+% if Group_Parameters.flag_filt==1
+%     Group_Results.interkey_mat_mean_corr=nanmean(Group_Parameters.interkey_mat_corr);
+%     Group_Results.interkey_mat_std_corr=nanstd(Group_Parameters.interkey_mat_corr)/sqrt(N); %error estandar
+% 
+%     subplot(2,1,2)
+%     barra=max(Group_Results.interkey_mat_mean_corr,[],'all')+0.1;
+%     for j=1:4:size(Group_Results.interkey_mat_mean_corr,2)
+%         %error estandar
+%         x_vector = [j:j+3, fliplr(j:j+3)];
+%         x_vector2=[Group_Results.interkey_mat_mean_corr(j:j+3)+Group_Results.interkey_mat_std_corr(j:j+3),fliplr(Group_Results.interkey_mat_mean_corr(j:j+3)-Group_Results.interkey_mat_std_corr(j:j+3))];
+%         patch = fill(x_vector, x_vector2, [128 193 219]./255);
+%         set(patch, 'edgecolor', 'none');
+%         set(patch, 'FaceAlpha', 1);
+%         hold on;
+%         %secuencia
+%         plot(j:j+3,Group_Results.interkey_mat_mean_corr(:,j:j+3),'k-'); hold on;
+%         %barras de ITI
+%         if mod(j-1,48)== 0 %si j cae en un rest hay que poner la barra de otro color. Hay 48= 4 transiciones x 12 secuencias
+%             bar(j-4+3.5,barra,1,'FaceColor',[128 193 219]./255,'EdgeColor',[128 193 219]./255);
+%             hold on;
+%         end
+%          bar(j+3.5,barra,1,'FaceColor',[.7 .7 .7],'EdgeColor',[.7 .7 .7]);
+%          hold on;
+% 
+%     end
+%     xlabel('transitions');
+%     ylabel('time [s]');
+%     yline(0)
+%     title('Filt')
+% end
+% 
+% %%
+% saveas(gcf,[path 'Curva_seq_Group.' 'fig']);
+% saveas(gcf,[path 'Curva_seq_Group.' 'png']);
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1267,84 +1274,224 @@ saveas(gcf,[path 'Curva_seq_Group.' 'png']);
 %%%  values are not.                                                    %%%
 %%%                             GC 6/1/23                               %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-figure(13); set(gcf,'Color','white'); box OFF; hold on; sgtitle(titulo)
+if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
 
-%MOGS NO ACUM -------------------------------------------------------------
-Group_Results.mediana_MicroMogs_mean=nanmedian(Group_Parameters.mediana_MicroMOGS_group);
-Group_Results.mediana_MicroMogs_std=nanstd(Group_Parameters.mediana_MicroMOGS_group)/sqrt(N); %error estandar
+    figure(13); set(gcf,'Color','white'); box OFF; hold on; sgtitle(titulo)
 
-subplot(2,2,1)
-plot(1:1:length(Group_Results.mediana_MicroMogs_mean),Group_Results.mediana_MicroMogs_mean,'+');
-errorbar(1:1:length(Group_Results.mediana_MicroMogs_mean),Group_Results.mediana_MicroMogs_mean, Group_Results.mediana_MicroMogs_std);
-hold on;
-xlabel('Blocks','FontName','Arial','FontSize',12);
-ylabel('MicroMogs - median','FontName','Arial','FontSize',12); 
-%ylim([0 (max(Group_Results.mediana_MicroMogs_mean)+min(Group_Results.mediana_MicroMogs_mean))]);
-xlim([0 length(Group_Results.mediana_MicroMogs_mean)+1]);
+    %MOGS NO ACUM -------------------------------------------------------------
+    Group_Results.mediana_MicroMogs_mean=nanmedian(Group_Parameters.mediana_MicroMOGS_group);
+    Group_Results.mediana_MicroMogs_std=nanstd(Group_Parameters.mediana_MicroMOGS_group)/sqrt(N); %error estandar
 
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    ylim([-0.15 0.15])
-else
+    subplot(2,2,1)
+    plot(1:1:length(Group_Results.mediana_MicroMogs_mean),Group_Results.mediana_MicroMogs_mean,'+');
+    errorbar(1:1:length(Group_Results.mediana_MicroMogs_mean),Group_Results.mediana_MicroMogs_mean, Group_Results.mediana_MicroMogs_std);
+    hold on;
+    xlabel('Blocks','FontName','Arial','FontSize',12);
+    ylabel('MicroMogs - median','FontName','Arial','FontSize',12); 
+    %ylim([0 (max(Group_Results.mediana_MicroMogs_mean)+min(Group_Results.mediana_MicroMogs_mean))]);
+    xlim([0 length(Group_Results.mediana_MicroMogs_mean)+1]);
+
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        ylim([-0.15 0.15])
+    else
+        ylim([-0.5 0.5])
+    end
+    yline(0)
+
+    %MONGS NO ACUM ------------------------------------------------------------
+    Group_Results.mediana_MicroMongs_mean=nanmedian(Group_Parameters.mediana_MicroMONGS_group);
+    Group_Results.mediana_MicroMongs_std=nanstd(Group_Parameters.mediana_MicroMONGS_group)/sqrt(N); %error estandar
+
+    subplot(2,2,2)
+    plot(1:1:length(Group_Results.mediana_MicroMongs_mean),Group_Results.mediana_MicroMongs_mean,'+');
+    errorbar(1:1:length(Group_Results.mediana_MicroMongs_mean),Group_Results.mediana_MicroMongs_mean, Group_Results.mediana_MicroMongs_std);
+    hold on;
+    xlabel('Blocks','FontName','Arial','FontSize',12);
+    ylabel('MicroMongs - median','FontName','Arial','FontSize',12); 
+    %ylim([0 (max(Group_Results.mediana_MicroMongs_mean)+min(Group_Results.mediana_MicroMongs_mean))]);
+    xlim([0 length(Group_Results.mediana_MicroMongs_mean)+1]);
+
+    %GC 18/1/23
+    if Group_Parameters.flag_norm==0
+        ylim([-0.15 0.15])
+    else
+        ylim([-0.5 0.5])
+    end
+    yline(0)
+
+    %MOGS ACUM ----------------------------------------------------------------
+    Group_Results.mediana_MicroMogs_acum_mean=nanmean(Group_Parameters.mediana_MicroMOGS_acum_group);
+    Group_Results.mediana_MicroMogs_acum_std=nanstd(Group_Parameters.mediana_MicroMOGS_acum_group)/sqrt(N); %error estandar
+
+    subplot(2,2,3)
+    plot(1:1:length(Group_Results.mediana_MicroMogs_acum_mean),Group_Results.mediana_MicroMogs_acum_mean,'+');
+    errorbar(1:1:length(Group_Results.mediana_MicroMogs_acum_mean),Group_Results.mediana_MicroMogs_acum_mean, Group_Results.mediana_MicroMogs_acum_std);
+    hold on;
+    xlabel('Blocks','FontName','Arial','FontSize',12);
+    ylabel('MicroMogs - median','FontName','Arial','FontSize',12); 
+    title('Acum')
+    %ylim([0 (max(Group_Results.mediana_MicroMogs_acum_mean)+min(Group_Results.mediana_MicroMogs_acum_mean))]);
+    xlim([0 length(Group_Results.mediana_MicroMogs_acum_mean)+1]);
     ylim([-0.5 0.5])
-end
-yline(0)
+    yline(0)
 
-%MONGS NO ACUM ------------------------------------------------------------
-Group_Results.mediana_MicroMongs_mean=nanmedian(Group_Parameters.mediana_MicroMONGS_group);
-Group_Results.mediana_MicroMongs_std=nanstd(Group_Parameters.mediana_MicroMONGS_group)/sqrt(N); %error estandar
+    %MONGS ACUM ---------------------------------------------------------------
+    Group_Results.mediana_MicroMongs_acum_mean=nanmean(Group_Parameters.mediana_MicroMONGS_acum_group);
+    Group_Results.mediana_MicroMongs_acum_std=nanstd(Group_Parameters.mediana_MicroMONGS_acum_group)/sqrt(N); %error estandar
 
-subplot(2,2,2)
-plot(1:1:length(Group_Results.mediana_MicroMongs_mean),Group_Results.mediana_MicroMongs_mean,'+');
-errorbar(1:1:length(Group_Results.mediana_MicroMongs_mean),Group_Results.mediana_MicroMongs_mean, Group_Results.mediana_MicroMongs_std);
-hold on;
-xlabel('Blocks','FontName','Arial','FontSize',12);
-ylabel('MicroMongs - median','FontName','Arial','FontSize',12); 
-%ylim([0 (max(Group_Results.mediana_MicroMongs_mean)+min(Group_Results.mediana_MicroMongs_mean))]);
-xlim([0 length(Group_Results.mediana_MicroMongs_mean)+1]);
-
-%GC 18/1/23
-if Group_Parameters.flag_norm==0
-    ylim([-0.15 0.15])
-else
+    subplot(2,2,4)
+    plot(1:1:length(Group_Results.mediana_MicroMongs_acum_mean),Group_Results.mediana_MicroMongs_acum_mean,'+');
+    errorbar(1:1:length(Group_Results.mediana_MicroMongs_acum_mean),Group_Results.mediana_MicroMongs_acum_mean, Group_Results.mediana_MicroMongs_acum_std);
+    hold on;
+    xlabel('Blocks','FontName','Arial','FontSize',12);
+    ylabel('MicroMongs - median','FontName','Arial','FontSize',12); 
+    title('Acum')
+    %ylim([0 (max(Group_Results.mediana_MicroMongs_acum_mean)+min(Group_Results.mediana_MicroMongs_acum_mean))]);
+    xlim([0 length(Group_Results.mediana_MicroMongs_acum_mean)+1]);
     ylim([-0.5 0.5])
+    yline(0)
+
+    %%
+    saveas(gcf,[path '_Median_MicroMicroGains.' 'fig']);
+    saveas(gcf,[path '_Median_MicroMicroGains.' 'png']);
+end %si esta corregida
+%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                            FIGURE 14 y 15                           %%%
+%%%           Correlation Block Duration Vs MOGS and MONGS              %%%
+%%% Because some of the subjects didn't have the expected behaviour, we %%%
+%%% think that the Micro Gains may be retalted to the time each subject %%%
+%%% takes to complete each block.                                       %%%
+%%% In order to compare ITI subjects with no ITI subjects, there are 2  %%%
+%%% aproches:                                                           %%%
+%%%         - Leave the ITI as part of the Block Duration (as the figures%%
+%%%             above)                                                  %%%
+%%%         - Substract the 11 ITIs from the Block Duration             %%%
+%%%                                                                     %%%
+%%% This figure shows the first aproach with non acumulative and acumulative
+%%% raw data.                                                           %%%
+%%% The mean values are shown in the figure, but a matrix for each subject%
+%%%is created.                                                          %%%
+%%% In order to get the R^2 value of the correlation, we make a linear  %%%
+%%% regression.
+%%%                         GC 12/5/2023                                %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+CorrelacionPlot(Group_Results,Group_Results.mogs_group_mean,Group_Results.mongs_group_mean,Group_Results.mogs_group_acumulado_mean,Group_Results.mongs_group_acumulado_mean,[titulo ' - crudo'],paradigm_flag);
+
+saveas(gcf,[path '_Correlacion_crudo_Group.' 'fig']);
+saveas(gcf,[path '_Correlacion_crudo_Group.' 'png']);
+
+if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
+    
+   CorrelacionPlot(Group_Results,Group_Results.mogs_group_corr_mean,Group_Results.mongs_group_corr_mean,Group_Results.mogs_group_acumulado_corr_mean,Group_Results.mongs_group_acumulado_corr_mean,[titulo ' - ' Group_Parameters.titulo_analisis],paradigm_flag);
+
+   saveas(gcf,[path '_Correlacion_corr_Group.' 'fig']);
+   saveas(gcf,[path '_Correlacion_corr_Group.' 'png']);
 end
-yline(0)
-
-%MOGS ACUM ----------------------------------------------------------------
-Group_Results.mediana_MicroMogs_acum_mean=nanmean(Group_Parameters.mediana_MicroMOGS_acum_group);
-Group_Results.mediana_MicroMogs_acum_std=nanstd(Group_Parameters.mediana_MicroMOGS_acum_group)/sqrt(N); %error estandar
-
-subplot(2,2,3)
-plot(1:1:length(Group_Results.mediana_MicroMogs_acum_mean),Group_Results.mediana_MicroMogs_acum_mean,'+');
-errorbar(1:1:length(Group_Results.mediana_MicroMogs_acum_mean),Group_Results.mediana_MicroMogs_acum_mean, Group_Results.mediana_MicroMogs_acum_std);
-hold on;
-xlabel('Blocks','FontName','Arial','FontSize',12);
-ylabel('MicroMogs - median','FontName','Arial','FontSize',12); 
-title('Acum')
-%ylim([0 (max(Group_Results.mediana_MicroMogs_acum_mean)+min(Group_Results.mediana_MicroMogs_acum_mean))]);
-xlim([0 length(Group_Results.mediana_MicroMogs_acum_mean)+1]);
-ylim([-0.5 0.5])
-yline(0)
-
-%MONGS ACUM ---------------------------------------------------------------
-Group_Results.mediana_MicroMongs_acum_mean=nanmean(Group_Parameters.mediana_MicroMONGS_acum_group);
-Group_Results.mediana_MicroMongs_acum_std=nanstd(Group_Parameters.mediana_MicroMONGS_acum_group)/sqrt(N); %error estandar
-
-subplot(2,2,4)
-plot(1:1:length(Group_Results.mediana_MicroMongs_acum_mean),Group_Results.mediana_MicroMongs_acum_mean,'+');
-errorbar(1:1:length(Group_Results.mediana_MicroMongs_acum_mean),Group_Results.mediana_MicroMongs_acum_mean, Group_Results.mediana_MicroMongs_acum_std);
-hold on;
-xlabel('Blocks','FontName','Arial','FontSize',12);
-ylabel('MicroMongs - median','FontName','Arial','FontSize',12); 
-title('Acum')
-%ylim([0 (max(Group_Results.mediana_MicroMongs_acum_mean)+min(Group_Results.mediana_MicroMongs_acum_mean))]);
-xlim([0 length(Group_Results.mediana_MicroMongs_acum_mean)+1]);
-ylim([-0.5 0.5])
-yline(0)
 
 %%
-saveas(gcf,[path '_Median_MicroMicroGains.' 'fig']);
-saveas(gcf,[path '_Median_MicroMicroGains.' 'png']);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                             FIGURE 16 y 17                          %%%
+%%% Figure with 3 axis to show how Micro Gains change with the block    %%%
+%%% duration in each block.                                             %%%
+%%% In order to compare ITI subjects with no ITI subjects, there are 2  %%%
+%%% aproches:                                                           %%%
+%%%         - Leave the ITI as part of the Block Duration (as the figures%%
+%%%             above)                                                  %%%
+%%%         - Substract the 11 ITIs from the Block Duration             %%%
+%%% This figure shows the first aproach with non acumulative and acumulative
+%%% raw data.                                                           %%%
+%%%                        GC 12/5/2023                                 %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BlockDur_vs_MicroGains(Group_Results,Group_Results.mogs_group_mean,Group_Results.mongs_group_mean,Group_Results.mogs_group_acumulado_mean,Group_Results.mongs_group_acumulado_mean,[titulo ' - crudo'],paradigm_flag);
+
+saveas(gcf,[path '_BlockDur_Vs_MicroGains_crudo_Group.' 'fig']);
+saveas(gcf,[path '_BlockDur_Vs_MicroGains_crudo_Group.' 'png']);
+
+if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
+    
+    BlockDur_vs_MicroGains(Group_Results,Group_Results.mogs_group_corr_mean,Group_Results.mongs_group_corr_mean,Group_Results.mogs_group_acumulado_corr_mean,Group_Results.mongs_group_acumulado_corr_mean,[titulo ' - ' Group_Parameters.titulo_analisis],paradigm_flag);
+
+    saveas(gcf,[path '_BlockDur_Vs_MicroGains_corr_Group.' 'fig']);
+    saveas(gcf,[path '_BlockDur_Vs_MicroGains_corr_Group.' 'png']);
+end
 
 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                         FIGURE                                      %%%
+%%% Tapping Speed: IKI_trial/1000.                                      %%%
+%%% Is the average of the time intervals (in ms) between adjacent keypresses
+%%% within correct sequences divided by 1000 (keypresses/s).            %%%
+%%%                     GC 11/6/2023                                    %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Group_Results.speed_group_mean = nanmean(1./Group_Parameters.iki_group,1);              
+Group_Results.speed_group_std = nanstd(1./Group_Parameters.iki_group,0,1)/sqrt(N);  
+
+%tapping_speed(Group_Results.speed_group_mean,Group_Results.speed_group_std,Group_Parameters,paradigm_flag,[titulo ' - crudo']);
+
+%saveas(gcf,[path '_tapping_speed_crudo_Group.' 'fig']);
+%saveas(gcf,[path '_tapping_speed_crudo_Group.' 'png']);
+
+if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
+    
+    Group_Results.speed_group_corr_mean = nanmean(1./Group_Parameters.iki_group_corr,1);              
+    Group_Results.speed_group_corr_std = nanstd(1./Group_Parameters.iki_group_corr,0,1)/sqrt(N);
+ %   tapping_speed(Group_Results.speed_group_corr_mean,Group_Results.speed_group_corr_std,Group_Parameters,paradigm_flag,[titulo ' - ' Group_Parameters.titulo_analisis]);
+    
+  %  saveas(gcf,[path '_tapping_speed_corr_Group.' 'fig']);
+  %  saveas(gcf,[path '_tapping_speed_corr_Group.' 'png']);
+end
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                         FIGURE                                      %%%
+%%% Learning Curve and Tapping Speed, visualization by bonstrup         %%%
+%%%                                                                     %%%
+%%%                     GC 23/6/2023                                    %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%------------------------------ IKI ---------------------------------------
+Group_Results.iki_visual_group_mean = nanmean(Group_Parameters.iki_visual_group,1);              
+Group_Results.iki_visual_group_std = nanstd(Group_Parameters.iki_visual_group,0,1)/sqrt(N);  
+
+Visualization_Learning_Grupal(Group_Results.iki_visual_group_mean,Group_Results.iki_visual_group_std,'iki',[titulo ' - crudo']);
+saveas(gcf,[path '_Learning_visual_crudo_Group.' 'fig']);
+saveas(gcf,[path '_Learning_visual_crudo_Group.' 'png']);
+
+%Learning_print(Group_Results.iki_visual_group_mean,Group_Parameters.iki_visual_group,[path 'Sujetos\'],'crudo');
+
+ if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
+    Group_Results.iki_visual_group_corr_mean = nanmean(Group_Parameters.iki_visual_group_corr,1);              
+    Group_Results.iki_visual_group_corr_std = nanstd(Group_Parameters.iki_visual_group_corr,0,1)/sqrt(N);  
+
+    Visualization_Learning_Grupal(Group_Results.iki_visual_group_corr_mean,Group_Results.iki_visual_group_corr_std,'iki',[titulo ' - ' Group_Parameters.titulo_analisis]);
+    saveas(gcf,[path '_Learning_visual_corr_Group.' 'fig']);
+    saveas(gcf,[path '_Learning_visual_corr_Group.' 'png']);
+    
+    %Learning_print(Group_Results.iki_visual_group_corr_mean,Group_Parameters.iki_visual_group_corr,[path 'Sujetos\'],'corr');
+     
+ end
+
+%------------------------------ TAPPING SPEED ------------------------------
+Group_Results.speed_visual_group_mean = nanmean(1./Group_Parameters.iki_visual_group,1);              
+Group_Results.speed_visual_group_std = nanstd(1./Group_Parameters.iki_visual_group,0,1)/sqrt(N);  
+
+Visualization_Learning_Grupal(Group_Results.speed_visual_group_mean,Group_Results.speed_visual_group_std,'speed',[titulo ' - crudo']);
+
+saveas(gcf,[path '_tapping_speed_visual_crudo_Group.' 'fig']);
+saveas(gcf,[path '_tapping_speed_visual_crudo_Group.' 'png']);
+
+if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
+    
+    Group_Results.speed_visual_group_corr_mean = nanmean(1./Group_Parameters.iki_visual_group_corr,1);              
+    Group_Results.speed_visual_group_corr_std = nanstd(1./Group_Parameters.iki_visual_group_corr,0,1)/sqrt(N);
+    
+    Visualization_Learning_Grupal(Group_Results.speed_visual_group_corr_mean,Group_Results.speed_visual_group_corr_std,'speed',[titulo ' - ' Group_Parameters.titulo_analisis]);
+    
+    saveas(gcf,[path '_tapping_speed_visual_corr_Group.' 'fig']);
+    saveas(gcf,[path '_tapping_speed_visual_corr_Group.' 'png']);
+end

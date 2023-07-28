@@ -1,4 +1,4 @@
-function Analisis_Seq_Individual(i_Dir)
+function Analisis_Seq_Individual_TIME(i_Dir)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Esta funcion se divide en varias secciones en las cuales se realiza la 
 %%% extracción de la data, cálculos de variables que dependen del tiempo en
@@ -22,7 +22,7 @@ function Analisis_Seq_Individual(i_Dir)
 %%% Se guardarán todos los resultados en la estructura seq_results, en el
 %%% archivo que corresponde a fname_results.mat en el path indicado. 
 %%% 
-%%%                         GC 12/12/2022
+%%%                         GC 3/6/2023
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if nargin < 1
@@ -50,7 +50,7 @@ elseif strfind(fname, 'con_ITI')
     param.nbBlocks = param.nbBlocksWithITI;
     flag_ITI='ITI'; % Indica que el protocolo contiene un ITI entre secuencias
 elseif strfind(fname,'Day_One') %PROTOCOLO GUILLE Y FLOR
-    param.sequence = param.seqA; %#ok<NODEF>
+    param.seqA = param.seqA; %#ok<NODEF>
     param.task = 'Task day one';
     param.nbBlocks = param.nbBlocksDayOne;
 else
@@ -65,24 +65,19 @@ seq_results(1,1).flag_norm=1; %set flag to 1 if you want a normalization of data
 if seq_results(1,1).flag_norm==1
     seq_results(1,1).flag_tipo_norm='01'; %indica qué tipo de normalización se quiere hacer: Z: zscore -- 01: normalización 01
 end
-seq_results.cant_SeqBlock=param.nbKeys/length(param.seqA);
 
 %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% SECTION 2: EXTRACT DATA FROM 'LOGORIGINAL' STRUCTURE %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-data = NaN(param.nbBlocks, param.nbKeys);                                   % matrix of time values corresponding to key presses. Dimensions: TOTAL BlockS (all conditions) x KEY PRESSES PER Block
-key = NaN(param.nbBlocks, param.nbKeys);                                    % matrix identifying which key was pressed (i.e., 1-4). Dimensions: TOTAL BlockS (all conditions) x KEY PRESSES PER Block
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% SECTION 2: EXTRACT DATA FROM 'LOGORIGINAL' STRUCTURE                  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+data = NaN(param.nbBlocks,[]);                                              % matrix of time values corresponding to key presses. Dimensions: TOTAL BlockS (all conditions) x KEY PRESSES PER Block
+key = NaN(param.nbBlocks, []);                                              % matrix identifying which key was pressed (i.e., 1-4). Dimensions: TOTAL BlockS (all conditions) x KEY PRESSES PER Block
 flag = '';                                                                  % used to separate rest periods (no key presses) from practice/training periods
 noBlock = 1;                                                                % used as counter below; eventually will equal TOTAL BlockS (all conditions)
 index = 1;                                                                  % used as counter in loop
 counter = 1;
 
-index_rest=1;
-noRest=1;
-data_rest = NaN(param.nbBlocks +1,param.nbKeys);                            % matrix of time values corresponding to key presses. Dimensions: TOTAL BlockS (all conditions) x KEY PRESSES IN THE REST
-key_rest = NaN(param.nbBlocks +1,param.nbKeys);                             % matrix identifying which key was pressed (i.e., 1-4). Dimensions: TOTAL BlockS (all conditions) x KEY PRESSES IN THE REST
-%estas dos matrices tienen 1 filas más para el rest del comienzo
+logoriginal=Remove_Simultaneous_keyPresses(logoriginal);                    %GC 16/7/23
 
 for nLine = 1:length(logoriginal) %#ok<USENS>
     if strcmp(logoriginal{nLine}{2}, 'Practice')                            % 'Practice' denotes a training Block is about to begin (data stored in next n cells where n corresponds to the number of key presses per Block)
@@ -100,49 +95,68 @@ for nLine = 1:length(logoriginal) %#ok<USENS>
     end % IF loop
          
     if strcmp(logoriginal{nLine}{2}, 'rep') && strcmp(flag, 'Practice')     % rep corresponds to single key press in the training Block
-        data(noBlock,index) = str2double(logoriginal{nLine}{1});            %tiempo    
-        key(noBlock,index) = str2double(logoriginal{nLine}{3});             %key
-        index = index + 1;                                                  % counter
-        if index > param.nbKeys && noBlock < param.nbBlocks                 % if counter = number of key presses within each Block
-            index = 1;                                                      % reset counter
-            noBlock = noBlock + 1;
-        end % IF loop
-    end % IF loop
-    
-    %la idea de estas líneas de código es poder ver si los sujetos siguen presionando teclas una vez que cambió de color la cruz central
-    if strcmp(logoriginal{nLine}{2}, 'rep') && strcmp(flag, 'Rest')         % rep corresponds to single key press in the rest
-        data_rest(noRest,index_rest) = str2double(logoriginal{nLine}{1});   % tiempo    
-        key_rest(noRest,index_rest) = str2double(logoriginal{nLine}{3});    % key
-        index_rest = index_rest + 1;                                        % counter
-        if index_rest > param.nbKeys && noRest < param.nbBlocks             % if counter = number of key presses within each rest
-            index_rest = 1;                                                 % reset counter
-            noRest = noRest + 1;
-        end % IF loop
-    end % IF loop
+        
+        if isempty(data) %para la primer tecla
+           
+            data(noBlock,index) = str2double(logoriginal{nLine}{1});            %tiempo    
+            key(noBlock,index) = str2double(logoriginal{nLine}{3});             %key
+            index = index + 1;                                                  % contador de teclas    
+        
+        else
+        
+            % if la data que se va a poner - la perimera data del bloque > duraciÃ³n del bloque = hubo un bloque y un rest de por medio de estas teclas
+            if str2double(logoriginal{nLine}{1})-data(noBlock,index-1) > param.durRest ...
+                    && noBlock < param.nbBlocks                
+                index = 1;                                                      % reset counter
+                noBlock = noBlock + 1;                                          %increase block
+            end % IF loop
 
-    
+            data(noBlock,index) = str2double(logoriginal{nLine}{1});            %tiempo    
+            key(noBlock,index) = str2double(logoriginal{nLine}{3});             %key
+            index = index + 1;                                                  % contador de teclas
+        
+        end %isempty loop
+    end % IF loop
 end % FOR loop
-clear index; clear flag; clear nLine; clear counter; clear index_rest;     % tidy workspace
+
+%Como las celdas vacias me las fuerza a 0, yo las fuerzo a NaN
+data(data==0)=NaN;
+key(key==0)=NaN;
+
+clear index; clear flag; clear nLine; clear counter;                        % tidy workspace
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% SECTION 3: COMPUTING DEPENENT VARIABLES BLOCK DURATION AND STANDARD %%%
 %%% DEVIATION OF THE INTERVAL BETWEEN KEY PRESSES                       %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-index= 1;
+index= 1;       
 if noBlock < param.nbBlocks % por si la tarea del sujeto corta antes por algun error
     noBlock=noBlock-1;
 end
 
-for i = 1:1:noBlock                                                        
-    seq_results(1,1).BLduration(index) = data(i,size(data,2)) - data(i,1);
+for i = 1:1:noBlock  
+    last_key(index)=size(data,2);
+    while (last_key(index)>0 && isnan(data(i,last_key(index))))
+        last_key(index)=last_key(index)-1;  %esta variable va a representar la posiciÃ³n de la ultima tecla
+    end
+    if last_key(index)==0 %si no se pulsó ninguna tecla en este bloque la fila será sólo NaN's
+         last_key(index)=1;
+    end
+    %este block duration lo toma entre la primera y ultima tecla, puede
+    %justo caer un iti al final y eso no lo cuenta, ojo con este parÃ¡metro si cortamos por tiempo
+    if  last_key(index)==1
+        seq_results(1,1).BLduration(index) = param.durBlock;
+    else
+        seq_results(1,1).BLduration(index) = data(i,last_key(index)) - data(i,1);
+    end
     seq_results(1,1).GOduration(index) = stimulus.stop(i) - stimulus.GO(i); 
+    interval=[NaN]; %por si no hay secuencias y no entra al for
     for nKey = 2:size(data,2)
         %este interval no discrimina los ITIs
-        interval(nKey-1) = data(i,nKey) - data(i,nKey-1); %#ok<AGROW>
+        interval(nKey-1) = data(i,nKey) - data(i,nKey-1); 
     end % FOR loop
-    seq_results(1,1).standard(index) = std(interval);
+    seq_results(1,1).standard(index) = nanstd(interval);
 
     index= index+ 1;                                              
 end % FOR loop 
@@ -154,12 +168,15 @@ clear index; clear i; clear interval; clear nKey;  % tidy workspace
 %%% SECTION 4: COMPUTING DEPENDENT VARIABLES ACCURACY AND SEQ DURATION  %%%
 %%%                                                                     %%%
 %%% This section builds upon the previous section and adds two new      %%%
-%%% dependent variables to the structure 'seq_results'.                 %%%
-%%% The variables computed in this section are described                %%%
+%%% dependent variables to the structure arrasys 'ctrl_results' and     %%%
+%%% 'seq_results'. The variables computed in this section are described %%%
 %%% below.                                                              %%%
 %%%                                                                     %%%
 %%% correct - 1 x n vector; number of correct sequences made within each%%%
-%%% Block.                                                              %%%
+%%% Block. For the CTRL condition, this is set to perfect in each Block %%%
+%%% n = # of Blocks in the sequence or control condition (nBlock/2). If %%%
+%%% te secuence is incomplete due to the finalization of the block, it is%%
+%%% still a correct sequence.
 %%%                                                                     %%%
 %%% SEQduration - 1 x n vector; computes the averaged time it takes to  %%%
 %%% complete a CORRECT m-element sequence within each Block. This       %%%
@@ -181,7 +198,8 @@ clear index; clear i; clear interval; clear nKey;  % tidy workspace
 %%%                                                                     %%%
 %%% IKI_per_trial: this variable stores the mean value of the four      %%% 
 %%% transitions made in a sequence. IKI = Inter Key Interval. A trial   %%% 
-%%% is considered as a complete five- element sequence "41324".         %%%
+%%% is considered as a complete five- element sequence "41324".  Does not%%
+%%% include incomplete sequences.                                       %%%
 %%%                                                                     %%%
 %%% interkey_matrix: each row has the type of interval, and each column %%%
 %%% the value of the interval corresponding to te trial. todas las      %%%
@@ -195,32 +213,35 @@ clear index; clear i; clear interval; clear nKey;  % tidy workspace
 %%% and proceed only with the dependnet variables listed in SECTION 3   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-seqduration = NaN(noBlock,(param.nbKeys/length(param.seqA)));              % Preallocate; sets variable with dimensions TOTAL Block # x THE NUMBER OF SEQUENCE REPETITIONS WITHIN A GIVEN Block (I.E., KEY PRESSES / NUMBER OF ELEMENTS IN THE SEQUENCE)
+%index = 1;                                                                 % used as counter in loop; used to count # of Blocks within a condition (SEQ or SEQ)
+
+seqduration = NaN(noBlock,[]);          % Preallocate; sets variable with dimensions TOTAL Block # x THE NUMBER OF SEQUENCE REPETITIONS WITHIN A GIVEN Block (I.E., KEY PRESSES / NUMBER OF ELEMENTS IN THE SEQUENCE)
                                                                            % Must allocate seqdurations with NaN; but this variable is dependent on CORRECT sequences; if errors are made, there are less seqduration within a given Block
 seq_results(1,1).correct = zeros(1,noBlock);                               % Initialize; start with zero correct sequences; will sum in the code below
 
-% Preallocate; sets variable with dimensions # SEQ Blocks x THE NUMBER OF SEQUENCE REPETITIONS WITHIN A GIVEN Block (I.E., KEY PRESSES / NUMBER OF ELEMENTS IN THE SEQUENCE);
-interval12 = NaN(noBlock,param.nbKeys/length(param.seqA));                  % interval12 = duration between 1st and 2nd elements in the seq
-interval23 = NaN(noBlock,param.nbKeys/length(param.seqA));                  % interval23 = duration between 2nd and 3rd elements in the seq
-interval34 = NaN(noBlock,param.nbKeys/length(param.seqA));                  % interval34 = duration between 3rd and 4th elements in the seq
-interval45 = NaN(noBlock,param.nbKeys/length(param.seqA));                  % interval45 = duration between 4th and 5th elements in the seq
+%Find3 = find(param.sequence == param.sequence(3));                         % Within the SEQ to be learned, find location of the element 3. The selection of 3 was arbitrary but the section ASSUMES that the element 3 only appears once in the sequence
 
-seq_results(1,1).IKI_per_trial =NaN(noBlock,param.nbKeys/length(param.seqA));
+% Preallocate; sets variable with dimensions # SEQ Blocks x THE NUMBER OF SEQUENCE REPETITIONS WITHIN A GIVEN Block (I.E., KEY PRESSES / NUMBER OF ELEMENTS IN THE SEQUENCE);
+interval12 = NaN(noBlock,[]);                  % interval12 = duration between 1st and 2nd elements in the seq
+interval23 = NaN(noBlock,[]);                  % interval23 = duration between 2nd and 3rd elements in the seq
+interval34 = NaN(noBlock,[]);                  % interval34 = duration between 3rd and 4th elements in the seq
+interval45 = NaN(noBlock,[]);                  % interval45 = duration between 4th and 5th elements in the seq
+seq_results(1,1).IKI_per_trial=NaN(noBlock,[]);
 
 %From 2nd to last correct seq, the flag will indicate if the sequence is continuous to the previous one
-flag_continuous_seq=NaN(noBlock,param.nbKeys/length(param.seqA));           % first column will allways be NaN. 
-                                                                            % Expample of two continuous sequences: 4132441324 -- In this case, set the flag to 1
-                                                                            % Example of two discontinuous sequences: 413244341324 - notice how the subject made a mistake and then started again -- In this case, set the flag to 0
+flag_continuous_seq=NaN(noBlock,[]);                                        % first column will allways be NaN. flag=1: continuous, flag=2: non continuus, flag=nan: subj didnt complete a seq in that block
 
-for i = 1:1:noBlock                                                         % i is used as counter that spans both SEQ and SEQ conditions
+
+for i = 1:1:noBlock                                                      % i is used as counter that spans both SEQ and SEQ conditions
+    %Loc3 = find(key(i,:) == param.sequence(3));                            
     previous_index=[];
-    for ii = 1:1:param.nbKeys                                               
-        flag_seq_correcta=0;                                                %mientras la flag esta en 0, o no se sabe o la secuencia es incorrecta
-        if ii+4 <= param.nbKeys % prevents error msg of exceeding matrix dimensions
+    for ii = 1:size(data,2)                                                
+        flag_seq_correcta=0;
+        if ii+4 <= last_key(i) % o menor a size(data,2)    CHECK                      
             if isempty(previous_index)==1 &&  key(i,ii) == param.seqA(1) && key(i,ii+1) == param.seqA(2) && key(i,ii+2) == param.seqA(3) && key(i,ii+3) == param.seqA(4) && key(i,ii+4) == param.seqA(5)
-                % above line checks to make sure the appropriate sequence was executed; only valid for 5-element sequences y que es solo la primera secuencia que encuentra como correcta
+                % above line checks to make sure the appropriate sequence was executed; only valid for 5-element sequences y que es solo la primera secuencia que encuentra como correcta               
                 
-                if strcmp(flag_ITI,'ITI')== 1
+                 if strcmp(flag_ITI,'ITI')== 1
                     if mod(ii+4,5)==0 % o sea que es multiplo de 5 -- concuerda con estar dentro de 1 trial (la seq no tiene iti de por medio)
                         flag_seq_correcta=1;
                     else %la secuencia tiene un ITI de por medio - NO ES ACEPTABLE
@@ -228,10 +249,9 @@ for i = 1:1:noBlock                                                         % i 
                     end
                 else
                     flag_seq_correcta=1;
-                end
+                 end
                 
-                
-                if flag_seq_correcta== 1
+                 if flag_seq_correcta== 1
                     
                     seq_results(1,1).correct(i) = seq_results(1,1).correct(i) + 1;   % if correct sequence, add value of 1 to the count of correct sequences
                     seqduration(i,seq_results(1,1).correct(i)) = data(i,ii+4) - data(i,ii);                   % if correct sequence, determine time it took to complete sequence           
@@ -246,9 +266,12 @@ for i = 1:1:noBlock                                                         % i 
                     %IKI= Inter Key Interval
                     seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
+%                    %GC 17/6/23 para copiar grafico bonstrup
+%                    seq_results(1,1).IKI_per_trial_visual(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
+%                            interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
                
                 end %END IF SEQ_CORRECTA
-               
+            
             elseif key(i,ii) == param.seqA(1) && key(i,ii+1) == param.seqA(2) && key(i,ii+2) == param.seqA(3) && key(i,ii+3) == param.seqA(4) && key(i,ii+4) == param.seqA(5)
                                                                            %con la condición  de arriba chequeo que la secuencia sea correcta
                 if strcmp(flag_ITI,'ITI')== 1
@@ -275,7 +298,7 @@ for i = 1:1:noBlock                                                         % i 
                         if (previous_index(5)+1)== previous_index(6)            %si el indice del ultimo numero de la seq anterior es consecutivo con el indice del primer numero de esta seq
                             flag_continuous_seq(i,seq_results(1,1).correct(i))=1;
                         else
-                            flag_continuous_seq(i,seq_results(1,1).correct(i))=0;
+                            flag_continuous_seq(i,seq_results(1,1).correct(i))=2;
                         end
 
                         seqduration(i,seq_results(1,1).correct(i)) = data(i,ii+4) - data(i,ii);                   % if correct sequence, determine time it took to complete sequence           
@@ -290,24 +313,37 @@ for i = 1:1:noBlock                                                         % i 
                         % IKI= Inter Key Interval
                         seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
-
+                        
+%                        %GC 17/6/23 para copiar grafico bonstrup
+%                        seq_results(1,1).IKI_per_trial_visual(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
+%                            interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
+%                
                     end %END IF SAME LENGTH
-                end %END IF SEQ_CORRECTA
-   
-           end % IF loop
-                    
-%         %Cálculo de promedios por bloque
-%         seq_results(1,1).SEQduration(i) = nanmean(seqduration(i,:));       % compute mean of seqduration within each Block (use NaN mean b/c NaN's will be present if errors were made)
-%         seq_results(1,1).SEQstandard(i) = nanstd(seqduration(i,:));        % compute mean of seqduration within each Block (use NaN mean b/c NaN's will be present if errors were made)
-%         
-%         seq_results(1,1).Interval12(i) = nanmean(interval12(i,:));         % Compute mean - excludes NaNs
-%         seq_results(1,1).Interval23(i) = nanmean(interval23(i,:)); 
-%         seq_results(1,1).Interval34(i) = nanmean(interval34(i,:)); 
-%         seq_results(1,1).Interval45(i) = nanmean(interval45(i,:)); 
-%         
-%         seq_results(1,1).Intervalmean(i) = nanmean([interval12(i,:) interval23(i,:) interval34(i,:) interval45(i,:)]);
-
-        elseif (ii>param.nbKeys-4) && (ii<param.nbKeys) %Si son las ultimas 4 teclas pulsadas
+                end %END IF SEQ_CORRECTA          
+                
+            end % IF loop
+            
+                      
+%             %Cálculo de promedios por bloque
+%             seqduration(seqduration==0)=NaN;
+%             seq_results(1,1).SEQduration(i) = nanmean(seqduration(i,:));       % compute mean of seqduration within each Block (use NaN mean b/c NaN's will be present if errors were made)
+%             seq_results(1,1).SEQstandard(i) = nanstd(seqduration(i,:));        % compute mean of seqduration within each Block (use NaN mean b/c NaN's will be present if errors were made)
+% 
+%             interval12(interval12==0)=NaN;
+%             interval23(interval23==0)=NaN;
+%             interval34(interval34==0)=NaN;
+%             interval45(interval45==0)=NaN;
+%             
+%             seq_results(1,1).Interval12(i) = nanmean(interval12(i,:));         % Compute mean - excludes NaNs
+%             seq_results(1,1).Interval23(i) = nanmean(interval23(i,:)); 
+%             seq_results(1,1).Interval34(i) = nanmean(interval34(i,:)); 
+%             seq_results(1,1).Interval45(i) = nanmean(interval45(i,:)); 
+% 
+%             seq_results(1,1).Intervalmean(i) = nanmean([interval12(i,:) interval23(i,:) interval34(i,:) interval45(i,:)]);
+%       
+%             seq_results(1,1).IKI_per_trial(seq_results(1,1).IKI_per_trial==0)=NaN;
+            
+        elseif (ii>last_key(i)-4) && (ii<last_key(i)) %Si son las ultimas 4 teclas pulsadas
             % GC 17/6/2023
             % en este elseif se pueden evaluar las secuencias que no
             % llegaron a completar porque se cortó el tiempo de bloque.
@@ -315,7 +351,7 @@ for i = 1:1:noBlock                                                         % i 
             cont=1;
             index_max=0;
             while (cont~=0)
-                if ii + cont -1 <=param.nbKeys                               % si se encuentra dentro del bloque
+                if ii + cont -1 <=last_key(i)                               % si se encuentra dentro del bloque
                      if key(i,ii+cont -1) == param.seqA(cont)               % si es correcta
                          cont=cont+1;
                          index_max=1;
@@ -421,22 +457,31 @@ for i = 1:1:noBlock                                                         % i 
                 end %primera seq correcta
             end %flag_seq_correcta
             end %index_max cont>0       
-
-
-       end
+            
+        end % IF ii+4<last_key(i)   
     end % FOR loop
-        
-        %Cálculo de promedios por bloque
-        seq_results(1,1).SEQduration(i) = nanmean(seqduration(i,:));       % compute mean of seqduration within each Block (use NaN mean b/c NaN's will be present if errors were made)
-        seq_results(1,1).SEQstandard(i) = nanstd(seqduration(i,:));        % compute mean of seqduration within each Block (use NaN mean b/c NaN's will be present if errors were made)
-        
-        seq_results(1,1).Interval12(i) = nanmean(interval12(i,:));         % Compute mean - excludes NaNs
-        seq_results(1,1).Interval23(i) = nanmean(interval23(i,:)); 
-        seq_results(1,1).Interval34(i) = nanmean(interval34(i,:)); 
-        seq_results(1,1).Interval45(i) = nanmean(interval45(i,:)); 
-        
-        seq_results(1,1).Intervalmean(i) = nanmean([interval12(i,:) interval23(i,:) interval34(i,:) interval45(i,:)]);
+            %Cálculo de promedios por bloque
+            seqduration(seqduration==0)=NaN;
+            seq_results(1,1).SEQduration(i) = nanmean(seqduration(i,:));       % compute mean of seqduration within each Block (use NaN mean b/c NaN's will be present if errors were made)
+            seq_results(1,1).SEQstandard(i) = nanstd(seqduration(i,:));        % compute mean of seqduration within each Block (use NaN mean b/c NaN's will be present if errors were made)
+
+            interval12(interval12==0)=NaN;
+            interval23(interval23==0)=NaN;
+            interval34(interval34==0)=NaN;
+            interval45(interval45==0)=NaN;
+            
+            seq_results(1,1).Interval12(i) = nanmean(interval12(i,:));         % Compute mean - excludes NaNs
+            seq_results(1,1).Interval23(i) = nanmean(interval23(i,:)); 
+            seq_results(1,1).Interval34(i) = nanmean(interval34(i,:)); 
+            seq_results(1,1).Interval45(i) = nanmean(interval45(i,:)); 
+
+            seq_results(1,1).Intervalmean(i) = nanmean([interval12(i,:) interval23(i,:) interval34(i,:) interval45(i,:)]);
+      
+            seq_results(1,1).IKI_per_trial(seq_results(1,1).IKI_per_trial==0)=NaN;
+            %seq_results(1,1).IKI_per_trial_visual(seq_results(1,1).IKI_per_trial_visual==0)=NaN;
 end
+
+seq_results.cant_SeqBlock=max(seq_results.correct); %la máxima cantidad de secuencias en un bloque
 seq_results.seqduration=seqduration;
 
 %Interkey Matrix
@@ -455,13 +500,15 @@ addpath('C:\Users\physi\Documents\Guada_2022\MSL guada\Task_MSL\stim-master\expe
 %Filtro
 if seq_results(1,1).flag_filt==1
     [interval12_corr,interval23_corr,interval34_corr,interval45_corr,cant_puntos_total]= Id_corr_Interkey(interval12,interval23,interval34,interval45,fname,path);
-    seq_results(1,1).IKI_per_trial_corr=NaN(noBlock,param.nbKeys/length(param.seqA));
+    seq_results(1,1).IKI_per_trial_corr=NaN(noBlock,[]);
     % IKI
     for i=1:noBlock
-        for j=1:(param.nbKeys/length(param.seqA))
+        for j=1:last_key(i)
             seq_results(1,1).IKI_per_trial_corr(i,j)=nanmean([interval12_corr(i,j) interval23_corr(i,j) interval34_corr(i,j) interval45_corr(i,j)]);
         end
     end
+    seq_results(1,1).IKI_per_trial_corr(seq_results(1,1).IKI_per_trial_corr==0)=NaN;
+
     %Interkey matrix
     seq_results(1,1).interkey_matrix_corr=[reshape(interval12_corr',1, []); reshape(interval23_corr',1, []); reshape(interval34_corr',1, []); reshape(interval45_corr',1, [])];
     seq_results(1,1).interkey_matrix_corr=reshape(seq_results(1,1).interkey_matrix_corr,[],1)';
@@ -486,6 +533,7 @@ if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt==1
     seq_results(1,1).intervalo_34_corr=interval34_corr;
     seq_results(1,1).intervalo_45_corr=interval45_corr;
 end
+
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% SECTION 5: LEARNING ANALYSIS                                        %%%
@@ -521,6 +569,7 @@ if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt==1
     % MICRO MICRO CORREGIDO
     [seq_results(1,1).MicroMOGS_corr,seq_results(1,1).MicroMONGS_corr]= Micro_Micro_gains_key(interval12_corr,interval45_corr,flag_continuous_seq);
 end
+
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% SECTION 6: GENERATE FIGURES                                         %%%
