@@ -14,6 +14,7 @@ for j=1:size(IKI_per_subj,1)
         
         %sujeto individual
         plot(i+contBlock*durRest:i+(durBlock-1)+contBlock*durRest,IKI_per_subj(j,i:i+(durBlock-1)),'b','LineWidth',0.5);
+        ylim([0 2.2]);
         
     end
     

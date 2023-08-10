@@ -33,6 +33,7 @@ for i=1:durBlock:length(iki_mean)
     %hold on;
 end
 xlabel('Blocks');
+%ylim([0 2.2])
 if strcmp(variable,'speed')
     ylabel('Tapping Speed (keypresses/s)')
 else 

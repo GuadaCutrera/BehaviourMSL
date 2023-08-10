@@ -244,7 +244,7 @@ for i = 1:1:noBlock                                                         % i 
                     interval45(i,seq_results(1,1).correct(i)) = data(i,ii+4) - data(i,ii+3); 
 
                     %IKI= Inter Key Interval
-                    seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
+                    seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmedian([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
                
                 end %END IF SEQ_CORRECTA
@@ -288,7 +288,7 @@ for i = 1:1:noBlock                                                         % i 
                         interval45(i,seq_results(1,1).correct(i)) = data(i,ii+4) - data(i,ii+3);  
 
                         % IKI= Inter Key Interval
-                        seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
+                        seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmedian([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
 
                     end %END IF SAME LENGTH
@@ -367,7 +367,7 @@ for i = 1:1:noBlock                                                         % i 
 %                     seq_results(1,1).IKI_per_trial_visual(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
 %                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
 
-                   seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
+                   seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmedian([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
 
                 else                                                       %no es la primera correcta del bloque
@@ -409,7 +409,7 @@ for i = 1:1:noBlock                                                         % i 
                         end
                         interval45(i,seq_results(1,1).correct(i)) = interval45(i,seq_results(1,1).correct(i)-1);
                        
-                        seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
+                        seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmedian([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
 
 %                         %GC para copiar bonstrup 17/6/23
@@ -459,7 +459,7 @@ if seq_results(1,1).flag_filt==1
     % IKI
     for i=1:noBlock
         for j=1:(param.nbKeys/length(param.seqA))
-            seq_results(1,1).IKI_per_trial_corr(i,j)=nanmean([interval12_corr(i,j) interval23_corr(i,j) interval34_corr(i,j) interval45_corr(i,j)]);
+            seq_results(1,1).IKI_per_trial_corr(i,j)=nanmedian([interval12_corr(i,j) interval23_corr(i,j) interval34_corr(i,j) interval45_corr(i,j)]);
         end
     end
     %Interkey matrix
@@ -519,7 +519,7 @@ if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt==1
     % MICRO GAINS CORREGIDO
     [seq_results(1,1).MOGS_corr,seq_results(1,1).MONGS_corr,seq_results(1,1).Total_Learning_corr] = Micro_gains_key(seq_results(1,1).IKI_per_trial_corr,noBlock);
     % MICRO MICRO CORREGIDO
-    [seq_results(1,1).MicroMOGS_corr,seq_results(1,1).MicroMONGS_corr]= Micro_Micro_gains_key(interval12_corr,interval45_corr,flag_continuous_seq);
+    %[seq_results(1,1).MicroMOGS_corr,seq_results(1,1).MicroMONGS_corr]= Micro_Micro_gains_key(interval12_corr,interval45_corr,flag_continuous_seq);
 end
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

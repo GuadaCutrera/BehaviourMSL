@@ -23,6 +23,39 @@ function [interval12,interval23,interval34,interval45,IKI_trial_norm] = ...
 seq_per_block=size(interval12,2); %columnas
 noBlock=size(interval12,1); %filas
 
+figure;
+%vectorizo para graficar
+interval12=reshape(interval12',1, []);
+interval23=reshape(interval23',1, []);
+interval34=reshape(interval34',1, []);
+interval45=reshape(interval45',1, []);
+
+%plot
+figure;
+plot(interval12,'b.','MarkerSize',15); hold on;
+plot(interval23,'r.','MarkerSize',15); hold on;
+plot(interval34,'g.','MarkerSize',15); hold on;
+plot(interval45,'m.','MarkerSize',15); hold on;
+
+for i=1:seq_per_block:length(interval12)
+    xline(i)
+end
+ylim([0 1.5])
+title('crudo')
+legend('Int-12: "41"','Int-23: "13"','Int-34: "32"','Int-45: "24"');
+
+if ~strcmp(fname,'none')
+    saveas(gcf,[path fname(1:end-4) '_Intervalos_crudo.' 'fig']);
+    saveas(gcf,[path fname(1:end-4) '_Intervalos_crudo.' 'png']);
+    %clf %clear figure
+end
+
+% Devuelvo los intervalos a modo matricial
+interval12=reshape(interval12, seq_per_block, noBlock)';
+interval23=reshape(interval23, seq_per_block, noBlock)';
+interval34=reshape(interval34, seq_per_block, noBlock)';
+interval45=reshape(interval45, seq_per_block, noBlock)';
+
 aux12=interval12;
 aux23=interval23;
 aux34=interval34;

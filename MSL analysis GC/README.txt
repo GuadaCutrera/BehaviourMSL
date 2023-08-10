@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%		ANÁLISIS DE SUJETOS DE FORMA INDIVIDUAL          %%%
+%%%		ANÁLISIS DE SUJETOS DE FORMA INDIVIDUAL      %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Analisis_Seq_Individual: posicionarse en esta función y correr el
@@ -18,7 +18,7 @@ Esta función llama a:
 	- Visualization_LearningCurva
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%		ANÁLISIS DE SUJETOS DE FORMA GRUPAL		       %%%
+%%%		ANÁLISIS DE SUJETOS DE FORMA GRUPAL	     %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 LoadSubjects u otro script debe cargar todos los _results.mat de los 
