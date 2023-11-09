@@ -264,11 +264,8 @@ for i = 1:1:noBlock                                                      % i is 
                     interval45(i,seq_results(1,1).correct(i)) = data(i,ii+4) - data(i,ii+3); 
 
                     %IKI= Inter Key Interval
-                    seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
+                    seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmedian([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
-%                    %GC 17/6/23 para copiar grafico bonstrup
-%                    seq_results(1,1).IKI_per_trial_visual(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
-%                            interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
                
                 end %END IF SEQ_CORRECTA
             
@@ -311,37 +308,15 @@ for i = 1:1:noBlock                                                      % i is 
                         interval45(i,seq_results(1,1).correct(i)) = data(i,ii+4) - data(i,ii+3);  
 
                         % IKI= Inter Key Interval
-                        seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
+                        seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmedian([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
                         
-%                        %GC 17/6/23 para copiar grafico bonstrup
-%                        seq_results(1,1).IKI_per_trial_visual(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
-%                            interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
-%                
+               
                     end %END IF SAME LENGTH
                 end %END IF SEQ_CORRECTA          
                 
             end % IF loop
             
-                      
-%             %Cálculo de promedios por bloque
-%             seqduration(seqduration==0)=NaN;
-%             seq_results(1,1).SEQduration(i) = nanmean(seqduration(i,:));       % compute mean of seqduration within each Block (use NaN mean b/c NaN's will be present if errors were made)
-%             seq_results(1,1).SEQstandard(i) = nanstd(seqduration(i,:));        % compute mean of seqduration within each Block (use NaN mean b/c NaN's will be present if errors were made)
-% 
-%             interval12(interval12==0)=NaN;
-%             interval23(interval23==0)=NaN;
-%             interval34(interval34==0)=NaN;
-%             interval45(interval45==0)=NaN;
-%             
-%             seq_results(1,1).Interval12(i) = nanmean(interval12(i,:));         % Compute mean - excludes NaNs
-%             seq_results(1,1).Interval23(i) = nanmean(interval23(i,:)); 
-%             seq_results(1,1).Interval34(i) = nanmean(interval34(i,:)); 
-%             seq_results(1,1).Interval45(i) = nanmean(interval45(i,:)); 
-% 
-%             seq_results(1,1).Intervalmean(i) = nanmean([interval12(i,:) interval23(i,:) interval34(i,:) interval45(i,:)]);
-%       
-%             seq_results(1,1).IKI_per_trial(seq_results(1,1).IKI_per_trial==0)=NaN;
             
         elseif (ii>last_key(i)-4) && (ii<last_key(i)) %Si son las ultimas 4 teclas pulsadas
             % GC 17/6/2023
@@ -399,11 +374,7 @@ for i = 1:1:noBlock                                                      % i is 
                     end
                     interval45(i,seq_results(1,1).correct(i)) = NaN; 
 
-                    %IKI= Inter Key Interval
-%                     seq_results(1,1).IKI_per_trial_visual(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
-%                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
-
-                   seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
+                   seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmedian([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
 
                 else                                                       %no es la primera correcta del bloque
@@ -430,6 +401,18 @@ for i = 1:1:noBlock                                                      % i is 
                         %cálculo de los intervalos entre presiones de teclas
                         switch(index_max)
                             %Como la secuencia está incompleta, se promedia el intervalo con los de la última secuencia correcta.
+%                                 case 1
+%                                     interval12(i,seq_results(1,1).correct(i)) = data(i,ii+1) - data(i,ii);
+%                                     interval23(i,seq_results(1,1).correct(i)) = NaN;
+%                                     interval34(i,seq_results(1,1).correct(i)) = NaN;
+%                                 case 2
+%                                     interval12(i,seq_results(1,1).correct(i)) = data(i,ii+1) - data(i,ii);
+%                                     interval23(i,seq_results(1,1).correct(i)) = data(i,ii+2) - data(i,ii+1);
+%                                     interval34(i,seq_results(1,1).correct(i)) = NaN;
+%                                 case 3
+%                                     interval12(i,seq_results(1,1).correct(i)) = data(i,ii+1) - data(i,ii);
+%                                     interval23(i,seq_results(1,1).correct(i)) = data(i,ii+2) - data(i,ii+1);
+%                                     interval34(i,seq_results(1,1).correct(i)) = data(i,ii+3) - data(i,ii+2);
                             case 1
                                 interval12(i,seq_results(1,1).correct(i)) = data(i,ii+1) - data(i,ii);
                                 interval23(i,seq_results(1,1).correct(i)) = interval23(i,seq_results(1,1).correct(i)-1);
@@ -442,15 +425,14 @@ for i = 1:1:noBlock                                                      % i is 
                                 interval12(i,seq_results(1,1).correct(i)) = data(i,ii+1) - data(i,ii);
                                 interval23(i,seq_results(1,1).correct(i)) = data(i,ii+2) - data(i,ii+1);
                                 interval34(i,seq_results(1,1).correct(i)) = data(i,ii+3) - data(i,ii+2); 
-                        end
+                         end
                         interval45(i,seq_results(1,1).correct(i)) = interval45(i,seq_results(1,1).correct(i)-1);
+                          % interval45(i,seq_results(1,1).correct(i)) = NaN;
                        
-                        seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
+                        seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmedian([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
-
-%                         %GC para copiar bonstrup 17/6/23
-%                         seq_results(1,1).IKI_per_trial_visual(i,seq_results(1,1).correct(i))=nanmean([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
-%                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i))]);
+%  seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i))=nanmedian([interval12(i,seq_results(1,1).correct(i)) interval23(i,seq_results(1,1).correct(i)) ...
+%                        interval34(i,seq_results(1,1).correct(i)) interval45(i,seq_results(1,1).correct(i)) seq_results(1,1).IKI_per_trial(i,seq_results(1,1).correct(i)-1)]);
 
                         
                     end
@@ -495,16 +477,16 @@ seq_results(1,1).intervalo_12=interval12;
 seq_results(1,1).intervalo_23=interval23;
 seq_results(1,1).intervalo_34=interval34;
 seq_results(1,1).intervalo_45=interval45;
-addpath('C:\Users\physi\Documents\Guada_2022\MSL guada\Task_MSL\stim-master\experiments');
+%addpath('C:\Users\physi\Documents\Guada_2022\MSL guada\Task_MSL\stim-master\experiments');
 
 %Filtro
 if seq_results(1,1).flag_filt==1
-    [interval12_corr,interval23_corr,interval34_corr,interval45_corr,cant_puntos_total]= Id_corr_Interkey(interval12,interval23,interval34,interval45,fname,path);
+    [interval12_corr,interval23_corr,interval34_corr,interval45_corr,cant_puntos_total]= Id_Filt_Interkey(interval12,interval23,interval34,interval45,fname,path);
     seq_results(1,1).IKI_per_trial_corr=NaN(noBlock,[]);
     % IKI
     for i=1:noBlock
-        for j=1:last_key(i)
-            seq_results(1,1).IKI_per_trial_corr(i,j)=nanmean([interval12_corr(i,j) interval23_corr(i,j) interval34_corr(i,j) interval45_corr(i,j)]);
+        for j=1:seq_results(1,1).correct(i)
+            seq_results(1,1).IKI_per_trial_corr(i,j)=nanmedian([interval12_corr(i,j) interval23_corr(i,j) interval34_corr(i,j) interval45_corr(i,j)]);
         end
     end
     seq_results(1,1).IKI_per_trial_corr(seq_results(1,1).IKI_per_trial_corr==0)=NaN;
@@ -556,7 +538,7 @@ end
 %%% iki de las dos ultimas teclas de la secuencia. En el caso de haber  %%%
 %%% ITI espuramente ONLINE.                                             %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-addpath('C:\Users\physi\Documents\Guada_2022\MSL guada\Task_MSL\stim-master\experiments')
+%addpath('C:\Users\physi\Documents\Guada_2022\MSL guada\Task_MSL\stim-master\experiments')
 
 % MICRO GAINS CRUDO
 [seq_results(1,1).MOGS,seq_results(1,1).MONGS,seq_results(1,1).Total_Learning] = Micro_gains_key(seq_results(1,1).IKI_per_trial,noBlock);
@@ -567,7 +549,7 @@ if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt==1
     % MICRO GAINS CORREGIDO
     [seq_results(1,1).MOGS_corr,seq_results(1,1).MONGS_corr,seq_results(1,1).Total_Learning_corr] = Micro_gains_key(seq_results(1,1).IKI_per_trial_corr,noBlock);
     % MICRO MICRO CORREGIDO
-    [seq_results(1,1).MicroMOGS_corr,seq_results(1,1).MicroMONGS_corr]= Micro_Micro_gains_key(interval12_corr,interval45_corr,flag_continuous_seq);
+    %[seq_results(1,1).MicroMOGS_corr,seq_results(1,1).MicroMONGS_corr]= Micro_Micro_gains_key(interval12_corr,interval45_corr,flag_continuous_seq);
 end
 
 %%

@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%		ANÁLISIS DE SUJETOS DE FORMA INDIVIDUAL          %%%
+%%%		ANÁLISIS DE SUJETOS DE FORMA INDIVIDUAL      %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Analisis_Seq_Individual: posicionarse en esta función y correr el
@@ -8,6 +8,8 @@ analizar. El archivo .mat debe ser aquel que diga "task" de MSL.
 Este script permite analizar el protocolo de GG y FJ en el cual 
 no hay ITI y el protocolo de GC que sí los tiene. 
 Para el protocolo de tiempo, la dinámica es la misma pero se utiliza la función Analisis_Seq_Individual_TIME. 
+Como seguí con los grupos que cortan por tiempo, estuve modificando la TIME y no la Analisis_Seq_Individual, 
+chequear que al fin y al cabo analicen lo mismo. 
 Esta función llama a:
 	- Remove_Simultaneous_keyPresses
 	- Micro_gains_key
@@ -18,10 +20,10 @@ Esta función llama a:
 	- Visualization_LearningCurva
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%		ANÁLISIS DE SUJETOS DE FORMA GRUPAL		       %%%
+%%%		ANÁLISIS DE SUJETOS DE FORMA GRUPAL	     %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-LoadSubjects u otro script debe cargar todos los _results.mat de los 
+LoadSubjects (o LoadTimeSubjects / LoadKeySubjects) u otro script debe cargar todos los _results.mat de los 
 sujetos que se quieran analizar de forma grupal. Se le pasan como 
 parámetro (array de structs) a ID_RunAnalysisGroup2
 que va a calcular media y desvío de cada tipo de variable que haya 
@@ -33,3 +35,7 @@ Este script llama a:
 	- Learning_print
 	- tapping_speed
 	- Visualization_Learning_Grupal
+	- InterKeyInterval_Plot_Grupal
+	- MicroGains_Plot_Grupal
+	- MicroMicroGains_Plot_Grupal
+	- MeanMicroMicroGains_Plot_Grupal

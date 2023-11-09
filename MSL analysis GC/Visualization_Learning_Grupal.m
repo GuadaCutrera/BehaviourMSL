@@ -10,6 +10,7 @@ durBlock=1000;                                                              % ca
 durRest=300;                                                                 %separacion visual entre bloques (cantidad de puntos a intercalar)
 
 figure; set(gcf,'Color','white'); box OFF; hold on; 
+set(gcf,'Position',get(0,'ScreenSize'));
 
 %barra=max(iki_mean(:)+0.1);
 contBlock=0;
@@ -33,10 +34,14 @@ for i=1:durBlock:length(iki_mean)
     %hold on;
 end
 xlabel('Blocks');
+%ylim([0 2.2])
 if strcmp(variable,'speed')
     ylabel('Tapping Speed (keypresses/s)')
 else 
     ylabel('Interkey Interval (s)')
 end
 sgtitle(titulo);
-%xticks(1:36);
+%xticks([500:1300:46500]);
+xticks([500:durBlock+durRest:46500]);
+xticklabels({'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',...
+    '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'})
