@@ -8,7 +8,7 @@
 
 
 function [MicroMogs_mean_acum,MicroMongs_mean_acum]=MeanMicroMicro_Gains_Plot_Indivudual(MicroMogs_mean,MicroMongs_mean,MicroMogs_std,MicroMongs_std,titulo)
-figure; set(gcf,'Color','white'); box OFF; hold on; sgtitle([titulo ' value per block - crudo'])
+figure; set(gcf,'Color','white'); box OFF; hold on; sgtitle([titulo ' value per block'])
 
 % -------------------------- Micro MOGS -----------------------------------
 %if seq_results(1,1).flag_norm==0

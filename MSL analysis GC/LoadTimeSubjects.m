@@ -46,6 +46,7 @@ clear;
 S_Piloto_tiempo_wo_ITI(1).S='S002\David_S2_Task - sin_ITI_1';
 S_Piloto_tiempo_wo_ITI(2).S='S003\claudia_S3_Task - sin_ITI_1';
 S_Piloto_tiempo_wo_ITI(3).S='S005 - sin punto\Camila_S5_Task - sin_ITI_1'; %aumenta bloque 3
+%S_Piloto_tiempo_wo_ITI(3).S='S005\Camila_S5_Task - sin_ITI_1'; %original
 S_Piloto_tiempo_wo_ITI(4).S='S006\Lucia_S6_Task - sin_ITI_1';
 S_Piloto_tiempo_wo_ITI(5).S='S007\Ezequiel_S7_Task - sin_ITI_1';
 S_Piloto_tiempo_wo_ITI(6).S='S008\Agatha_S8_Task - sin_ITI_1';
@@ -62,7 +63,7 @@ S_Piloto_tiempo_wo_ITI(16).S='S018\Beatriz_S18_Task - sin_ITI_1';
 
 %path_Piloto_tiempo_wo_ITI='C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time sin ITI\GrupoTransPrevia\';
 %path_Piloto_tiempo_wo_ITI='C:\Users\physi\Documents\Guada_2022\MSL guada\Task_MSL\stim-master\output\Piloto MSL time sin ITI\';
-path_Piloto_tiempo_wo_ITI='C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time sin ITI\GrupoTransPrevia\';
+path_Piloto_tiempo_wo_ITI='C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm a cero\Mediana\Piloto MSL time sin ITI - simKeyPress\';
 
 %Cargo los seq_results de los sujetos
 for i=1:length(S_Piloto_tiempo_wo_ITI)
@@ -74,7 +75,7 @@ end
 
 
 %Analisis Grupal codigo Guada
-%Resultados_Piloto_tiempo_wo_ITI=ID_RunAnalysisGroup2(Results,[path_Piloto_tiempo_wo_ITI 'Grupo_punto\'],'tiempo','without ITI');
+Resultados_Piloto_tiempo_wo_ITI=ID_RunAnalysisGroup2(Results,[path_Piloto_tiempo_wo_ITI 'Grupo\'],'tiempo','without ITI');
 
 
 %% Piloto Guada ITI 1s - protocolo tiempo -- teclado
@@ -93,13 +94,14 @@ S_Piloto_tiempo_ITI_1s(10).S='S014\Gonzalo_S14_Task - con_ITI_1';
 S_Piloto_tiempo_ITI_1s(11).S='S015\Ana_S15_Task - con_ITI_1';
 S_Piloto_tiempo_ITI_1s(12).S='S016\Martina_S16_Task - con_ITI_1';
 S_Piloto_tiempo_ITI_1s(13).S='S018 - sin punto\Stefania_S17_Task - con_ITI_1';
+%S_Piloto_tiempo_ITI_1s(13).S='S018\Stefania_S17_Task - con_ITI_1'; %original
 S_Piloto_tiempo_ITI_1s(14).S='S019\Sofia_S19_Task - con_ITI_1';
 S_Piloto_tiempo_ITI_1s(15).S='S020\Emiliano_S20_Task - con_ITI_1';
 S_Piloto_tiempo_ITI_1s(16).S='S021\Aldana_s21_Task - con_ITI_1';
 
 
 %path_Piloto_tiempo_ITI_1s='C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time 1s\GrupoTransPrevia\';
-path_Piloto_tiempo_ITI_1s='C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time 1s\GrupoTransPrevia\';
+path_Piloto_tiempo_ITI_1s='C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm a cero\Media\Piloto MSL time 1s - simKeyPress\';
 
 %Cargo los seq_results de los sujetos
 for i=1:length(S_Piloto_tiempo_ITI_1s)
@@ -111,7 +113,7 @@ end
 
 % 
 %Analisis Grupal codigo Guada
-%Resultados_Piloto_tiempo_ITI_1s=ID_RunAnalysisGroup2(Results,[path_Piloto_tiempo_ITI_1s 'Grupo_punto\'],'tiempo','with ITI');
+Resultados_Piloto_tiempo_ITI_1s=ID_RunAnalysisGroup2(Results,[path_Piloto_tiempo_ITI_1s 'Grupo\'],'tiempo','with ITI');
 
 %%  LOAD INTRO CON ITI - TECLADO
 
@@ -130,7 +132,9 @@ S_INTRO_ITI_1s(10).S='S014\Gonzalo_S14_Intro - con_ITI_1';
 S_INTRO_ITI_1s(11).S='S015\Ana_S15_Intro - con_ITI_1';
 S_INTRO_ITI_1s(12).S='S016\Martina_S16_Intro - con_ITI_1';
 S_INTRO_ITI_1s(13).S='S018 - sin punto\Stefania_S17_Intro - con_ITI_1';
+%S_INTRO_ITI_1s(13).S='S018\Stefania_S17_Intro - con_ITI_1'; %original
 S_INTRO_ITI_1s(14).S='S019\Sofia_S19_Intro - con_ITI_2'; %Tiene un Micro MOGS y MONGS enorme en la intro
+%S_INTRO_ITI_1s(14).S='S019\Sofia_S19_Intro - con_ITI_1'; %original
 S_INTRO_ITI_1s(15).S='S020\Emiliano_S20_Intro - con_ITI_1';
 S_INTRO_ITI_1s(16).S='S021\Aldana_s21_Intro - con_ITI_1';
 
@@ -143,8 +147,9 @@ Path='C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Beh
 %% LOAD INTRO SIN ITI TECLADO
 
 S_INTRO_wo_ITI(1).S='S002\David_S2_Intro - sin_ITI_1';
-S_INTRO_wo_ITI(2).S='S003\claudia_S3_Intro - sin_ITI_1';  % CLAUDIA ES LA PROBLEMATICA EN LA INTRO
+S_INTRO_wo_ITI(2).S='S003\claudia_S3_Intro - sin_ITI_2';  % CLAUDIA ES LA PROBLEMATICA EN LA INTRO
 S_INTRO_wo_ITI(3).S='S005 - sin punto\Camila_S5_Intro - sin_ITI_1'; %aumenta bloque 3
+%S_INTRO_wo_ITI(3).S='S005\Camila_S5_Intro - sin_ITI_1'; %original
 S_INTRO_wo_ITI(4).S='S006\Lucia_S6_Intro - sin_ITI_1';
 S_INTRO_wo_ITI(5).S='S007\Ezequiel_S7_Intro - sin_ITI_1';
 S_INTRO_wo_ITI(6).S='S008\Agatha_S8_Intro - sin_ITI_1';
@@ -215,3 +220,21 @@ saveas(gcf,['C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisGuada\Beha
 % 
 % CompareAnalisis(GRUPOS);
 
+%% GRUPO COMPLETO CON INTRO - Critero paraquitar puntos
+clear
+
+Path_ITI='C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time 1s\GrupoTransPrevia\Grupo\Intro + Task\';
+Path_wo_ITI='C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time sin ITI\GrupoTransPrevia\Grupo\Intro + Task\';
+
+Group_Results_w_ITI_1s=load([Path_ITI 'Group_Results_Intro_Task.mat']);
+Group_Results_wo_ITI=load([Path_wo_ITI 'Group_Results_Intro_Task.mat']);
+
+%% calculo los MAD
+mad_ITI=mad(Group_Results_w_ITI_1s.Intro_Task_Group.Intro_Task.iki_group,1);
+mad_wo_ITI=mad(Group_Results_wo_ITI.Intro_Task_Group.Intro_Task.iki_group,1);
+
+%
+PlotInteractivo(ones(1,16),Group_Results_w_ITI_1s.Intro_Task_Group.Intro_Task,Group_Results_w_ITI_1s.Intro_Task_Group,9*mad_ITI,'');
+saveas(gcf,[Path_ITI 'Interactivo_original_wITI_IKI_9_mad.' 'fig']);
+PlotInteractivo(ones(1,16),Group_Results_wo_ITI.Intro_Task_Group.Intro_Task,Group_Results_wo_ITI.Intro_Task_Group,9*mad_wo_ITI,'');
+saveas(gcf,[Path_wo_ITI 'Interactivo_original_woITI_IKI_9_mad.' 'fig']);

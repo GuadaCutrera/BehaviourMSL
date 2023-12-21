@@ -6,8 +6,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function Visualization_Learning_Grupal(iki_mean,iki_std,variable,titulo)
-durBlock=1000;                                                              % cantidad de puntos dentro de un bloque
-durRest=300;                                                                 %separacion visual entre bloques (cantidad de puntos a intercalar)
+% durBlock=1000;                                                              % cantidad de puntos dentro de un bloque
+% durRest=300;                                                                 %separacion visual entre bloques (cantidad de puntos a intercalar)
+
+durBlock=10;                                                              % cantidad de puntos dentro de un bloque
+durRest=3;                                                                 %separacion visual entre bloques (cantidad de puntos a intercalar)
 
 figure; set(gcf,'Color','white'); box OFF; hold on; 
 set(gcf,'Position',get(0,'ScreenSize'));
@@ -42,6 +45,6 @@ else
 end
 sgtitle(titulo);
 %xticks([500:1300:46500]);
-xticks([500:durBlock+durRest:46500]);
-xticklabels({'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',...
+xticks([5:durBlock+durRest:475]);
+xticklabels({'Intro','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',...
     '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'})

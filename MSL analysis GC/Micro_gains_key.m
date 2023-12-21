@@ -60,7 +60,11 @@ for j=1:(noBlock)
         end
     end
     
-    mongs(j)=IKI_per_trial(j,primero)-IKI_per_trial(j,ultimo);
+    if ultimo==primero %una sola secuencia en ese bloque
+        mongs(j)=NaN;
+    else
+        mongs(j)=IKI_per_trial(j,primero)-IKI_per_trial(j,ultimo);
+    end
     
 end
 

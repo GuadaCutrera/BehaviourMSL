@@ -2,13 +2,13 @@
 
 %% ------------------------------------SIN ITI media -----------------------------
 clear all
-close all
+%close all
 
-Grupo_completo=load('C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time sin ITI\GrupoTransprevia\Grupo\Group_Results.mat');
+Grupo_completo=load('C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time sin ITI\GrupoTransprevia\Grupo\Group_Results.mat');
 Grupo_15_sujetos=load('C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time sin ITI\GrupoTransprevia\Grupo_sin3\Group_Results.mat');
 Grupo_sin_punto=load('C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time sin ITI\GrupoTransprevia\Grupo_punto\Group_Results.mat');
 
-%-------------------------------- SIN ITI mediana  ------------------------
+%% -------------------------------- SIN ITI mediana  ------------------------
 clear all
 close all
 
@@ -20,11 +20,11 @@ Grupo_sin_punto=load('C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisG
 clear all
 close all
 
-Grupo_completo=load('C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time 1s\GrupoTransprevia\Grupo\Group_Results.mat');
-Grupo_15_sujetos=load('C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time 1s\GrupoTransprevia\Grupo_sin13\Group_Results.mat');
-Grupo_sin_punto=load('C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time 1s\GrupoTransprevia\Grupo_punto\Group_Results.mat');
+Grupo_completo=load('C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time 1s\GrupoTransprevia\Grupo\Group_Results.mat');
+% Grupo_15_sujetos=load('C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time 1s\GrupoTransprevia\Grupo_sin13\Group_Results.mat');
+% Grupo_sin_punto=load('C:\Users\physi\Documents\Guada_2022\Behavior MSL\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time 1s\GrupoTransprevia\Grupo_punto\Group_Results.mat');
 
-%%-------------------------------- CON ITI 1S mediana  ------------------------
+%% -------------------------------- CON ITI 1S mediana  ------------------------
 clear all
 close all
 

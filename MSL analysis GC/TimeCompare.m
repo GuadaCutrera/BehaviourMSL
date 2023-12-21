@@ -5,9 +5,9 @@ clc
 %close all
 
 % la intro y task de 16 % sin el punto del wo ITI
-Group_Results_wo_ITI= load('C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time sin ITI\GrupoTransprevia\Grupo_punto\Intro + Task\Group_Results_Intro_Task.mat');
-Group_Results_w_ITI_1s= load('C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time 1s\GrupoTransprevia\Grupo_punto\Intro + Task\Group_Results_Intro_Task2.mat');
-path_para_Guardar='C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\ComparePlots\Con Intro\';
+% Group_Results_wo_ITI= load('C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time sin ITI\GrupoTransprevia\Grupo_punto\Intro + Task\Group_Results_Intro_Task.mat');
+% Group_Results_w_ITI_1s= load('C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time 1s\GrupoTransprevia\Grupo_punto\Intro + Task\Group_Results_Intro_Task2.mat');
+% path_para_Guardar='C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\ComparePlots\Con Intro\';
 
 %con el punto del wo ITI - completo
 % Group_Results_wo_ITI= load('C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\AnalisisGuada\Behaviour - Norm 01\Piloto MSL time sin ITI\GrupoTransprevia\Grupo_punto\Intro + Task\Group_Results_Intro_Task2.mat');
@@ -22,10 +22,10 @@ path_para_Guardar='C:\Users\guada\Desktop\LFA FMED\Codigos Guada\Guada_2023\Comp
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 pathGuardar=[path_para_Guardar 'Original\'];
 
-PlotInteractivo(ones(1,16),Group_Results_w_ITI_1s.Intro_Task_Group.Intro_Task,Group_Results_w_ITI_1s.Intro_Task_Group,'');
-saveas(gcf,[pathGuardar 'Interactivo_original_wITI_speed.' 'fig']);
-PlotInteractivo(ones(1,16),Group_Results_wo_ITI.Intro_Task_Group.Intro_Task,Group_Results_wo_ITI.Intro_Task_Group,'');
-saveas(gcf,[pathGuardar 'Interactivo_original_woITI_speed.' 'fig']);
+% PlotInteractivo(ones(1,16),Group_Results_w_ITI_1s.Intro_Task_Group.Intro_Task,Group_Results_w_ITI_1s.Intro_Task_Group,'');
+% saveas(gcf,[pathGuardar 'Interactivo_original_wITI_speed.' 'fig']);
+% PlotInteractivo(ones(1,16),Group_Results_wo_ITI.Intro_Task_Group.Intro_Task,Group_Results_wo_ITI.Intro_Task_Group,'');
+% saveas(gcf,[pathGuardar 'Interactivo_original_woITI_speed.' 'fig']);
 
 %% -------------------------- IKI y SPEED -----------------------------------
 
@@ -42,17 +42,17 @@ std_speed(2,:)=Group_Results_w_ITI_1s.Intro_Task_Group.speed_visual_group_std;
 
 Plot_Learning_3Axis(Matriz_speed,Matriz_iki,std_speed,std_iki,1,'',pathGuardar);
 
-LearningCompare(Matriz_speed,2)
-saveas(gcf,[pathGuardar 'TS_original.' 'fig']);
-saveas(gcf,[pathGuardar 'TS_original.' 'png']);
-
-LearningCompare(Matriz_iki,2)
-saveas(gcf,[pathGuardar 'iki_original.' 'fig']);
-saveas(gcf,[pathGuardar 'iki_original.' 'png']);
+% LearningCompare(Matriz_speed,2)
+% saveas(gcf,[pathGuardar 'TS_original.' 'fig']);
+% saveas(gcf,[pathGuardar 'TS_original.' 'png']);
+% 
+% LearningCompare(Matriz_iki,2)
+% saveas(gcf,[pathGuardar 'iki_original.' 'fig']);
+% saveas(gcf,[pathGuardar 'iki_original.' 'png']);
 
 clear Matriz_iki; clear Matriz_speed; clear std_speed; clear std_iki;
 
-% ------------------------ MICRO GAINS ------------------------------------
+%% ------------------------ MICRO GAINS ------------------------------------
 
 Matriz_MOGS_acum(1,:)=Group_Results_wo_ITI.Intro_Task_Group.MOGS_acum_group_mean;
 Matriz_MOGS_acum(2,:)=Group_Results_w_ITI_1s.Intro_Task_Group.MOGS_acum_group_mean;
@@ -274,24 +274,26 @@ saveas(gcf,[pathGuardar 'iki_1st_0.' 'fig']);
 saveas(gcf,[pathGuardar 'iki_1st_0.' 'png']);
 
 clear Matriz_iki; clear Matriz_speed; clear std_speed; clear std_iki;
-%% --------------------- MICRO GAINS ----------------------------------------
-Matriz_MOGS_acum(1,:)=Resultados_1st_to_0_wo_ITI.MOGS_acum_mean;
-Matriz_MOGS_acum(2,:)=Resultados_1st_to_0_ITI.MOGS_acum_mean;
+%% --------------------- MICRO GAINS  tapping----------------------------------------
+% para los del iki cambiar el nombre: borrar el tapping y en la funcion de
+% plot los lim entre -1 y 1
+Matriz_MOGS_acum(1,:)=Resultados_1st_to_0_wo_ITI.MOGS_acum_tapping_mean;
+Matriz_MOGS_acum(2,:)=Resultados_1st_to_0_ITI.MOGS_acum_tapping_mean;
 
-Matriz_MONGS_acum(1,:)=Resultados_1st_to_0_wo_ITI.MONGS_acum_mean;
-Matriz_MONGS_acum(2,:)=Resultados_1st_to_0_ITI.MONGS_acum_mean;
+Matriz_MONGS_acum(1,:)=Resultados_1st_to_0_wo_ITI.MONGS_acum_tapping_mean;
+Matriz_MONGS_acum(2,:)=Resultados_1st_to_0_ITI.MONGS_acum_tapping_mean;
 
-Matriz_TL_acum(1,:)=Resultados_1st_to_0_wo_ITI.TL_acum_mean;
-Matriz_TL_acum(2,:)=Resultados_1st_to_0_ITI.TL_acum_mean;
+Matriz_TL_acum(1,:)=Resultados_1st_to_0_wo_ITI.TL_acum_tapping_mean;
+Matriz_TL_acum(2,:)=Resultados_1st_to_0_ITI.TL_acum_tapping_mean;
 
-Matriz_MOGS_std(1,:)=Resultados_1st_to_0_wo_ITI.MOGS_acum_std;
-Matriz_MOGS_std(2,:)=Resultados_1st_to_0_ITI.MOGS_acum_std;
+Matriz_MOGS_std(1,:)=Resultados_1st_to_0_wo_ITI.MOGS_acum_tapping_std;
+Matriz_MOGS_std(2,:)=Resultados_1st_to_0_ITI.MOGS_acum_tapping_std;
 
-Matriz_MONGS_std(1,:)=Resultados_1st_to_0_wo_ITI.MONGS_acum_std;
-Matriz_MONGS_std(2,:)=Resultados_1st_to_0_ITI.MONGS_acum_std;
+Matriz_MONGS_std(1,:)=Resultados_1st_to_0_wo_ITI.MONGS_acum_tapping_std;
+Matriz_MONGS_std(2,:)=Resultados_1st_to_0_ITI.MONGS_acum_tapping_std;
 
-Matriz_TL_std(1,:)=Resultados_1st_to_0_wo_ITI.TL_acum_std;
-Matriz_TL_std(2,:)=Resultados_1st_to_0_ITI.TL_acum_std;
+Matriz_TL_std(1,:)=Resultados_1st_to_0_wo_ITI.TL_acum_tapping_std;
+Matriz_TL_std(2,:)=Resultados_1st_to_0_ITI.TL_acum_tapping_std;
 
 MicroGainsCompare(Matriz_MOGS_acum,Matriz_MONGS_acum, Matriz_TL_acum,'media',1,'0',Matriz_MOGS_std,Matriz_MONGS_std,Matriz_TL_std)
 saveas(gcf,[pathGuardar 'MicroGains_1st_0.' 'fig']);

@@ -63,7 +63,10 @@ end
 seq_results(1,1).flag_filt=0; %set this flag to 1 if you want the filtration of data
 seq_results(1,1).flag_norm=1; %set flag to 1 if you want a normalization of data
 if seq_results(1,1).flag_norm==1
-    seq_results(1,1).flag_tipo_norm='01'; %indica qué tipo de normalización se quiere hacer: Z: zscore -- 01: normalización 01
+    seq_results(1,1).flag_tipo_norm='cero'; %indica qué tipo de normalización se quiere hacer: Z: zscore -- 01: normalización 01 -- cero: media a cero
+    if strcmp(seq_results(1,1).flag_tipo_norm,'cero')
+        seq_results(1,1).flag_media=1; %se lleva a cero con la media. Si es cero se lleva a cero con la mediana. 
+    end
 end
 
 %%
@@ -125,6 +128,38 @@ key(key==0)=NaN;
 
 clear index; clear flag; clear nLine; clear counter;                        % tidy workspace
 
+%% traigo la intro de la tarea para que cuando se normalice, sea todo junto
+%7/12/23 GC
+% SI COMENTAS ESTO HAY QUE COMENTAR LA LINEA 173 donde se suma 1 al nro de bloques
+i_Dir2 = '';
+[fname2,path2]=uigetfile([ i_Dir2   '*.mat'], 'Choose a file to analyse');
+Intro=load(strcat(path2,fname2));
+index2 = 1;  
+
+
+for nLine2 = 1:length(Intro.logoriginal) 
+    if strcmp(Intro.logoriginal{nLine2}{2}, 'rep')   
+            data_intro(index2) = str2double(Intro.logoriginal{nLine2}{1});            % tiempo    
+            key_intro(index2) = str2double(Intro.logoriginal{nLine2}{3});             % key
+            index2 = index2 + 1;                                          % contador de teclas    
+        
+    end
+end
+
+delta_data=size(data_intro,2)-size(data,2); %si uno es mayor al otro esta diferencia es distinta de 0. en ese caso hay que completar con NaN
+if delta_data>0
+    data=[data NaN(size(data,1),abs(delta_data))];
+else
+    data_intro=[data_intro NaN(size(data_intro,1),abs(delta_data))];
+end
+delta_key=size(key_intro,2)-size(key,2); %si uno es mayor al otro esta diferencia es distinta de 0. en ese caso hay que completar con NaN
+if delta_key>0
+    key=[key NaN(size(key,1),abs(delta_key))];
+else
+    key_intro=[key_intro NaN(size(key_intro,1),abs(delta_key))];
+end
+data=[data_intro; data];
+key=[key_intro; key];
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% SECTION 3: COMPUTING DEPENENT VARIABLES BLOCK DURATION AND STANDARD %%%
@@ -134,6 +169,8 @@ index= 1;
 if noBlock < param.nbBlocks % por si la tarea del sujeto corta antes por algun error
     noBlock=noBlock-1;
 end
+
+noBlock=noBlock+1; %le sumo uno por la intro
 
 for i = 1:1:noBlock  
     last_key(index)=size(data,2);
@@ -505,7 +542,7 @@ if seq_results(1,1).flag_norm==1
         [interval12_corr,interval23_corr,interval34_corr,interval45_corr,seq_results(1,1).IKI_per_trial_corr] = Id_Norm_Interkey(interval12_corr,interval23_corr,interval34_corr,interval45_corr,seq_results(1,1).IKI_per_trial_corr,fname,path,seq_results(1,1).flag_tipo_norm);
     else 
         %si antes no se hizo un filtrado, normalizo la data cruda
-        [interval12_corr,interval23_corr,interval34_corr,interval45_corr,seq_results(1,1).IKI_per_trial_corr] = Id_Norm_Interkey(interval12,interval23,interval34,interval45,seq_results(1,1).IKI_per_trial,fname,path,seq_results(1,1).flag_tipo_norm);
+        [interval12_corr,interval23_corr,interval34_corr,interval45_corr,seq_results(1,1).IKI_per_trial_corr] = Id_Norm_Interkey(interval12,interval23,interval34,interval45,seq_results(1,1).IKI_per_trial,fname,path,seq_results(1,1).flag_tipo_norm,1);
     end
 end
 
@@ -549,7 +586,7 @@ if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt==1
     % MICRO GAINS CORREGIDO
     [seq_results(1,1).MOGS_corr,seq_results(1,1).MONGS_corr,seq_results(1,1).Total_Learning_corr] = Micro_gains_key(seq_results(1,1).IKI_per_trial_corr,noBlock);
     % MICRO MICRO CORREGIDO
-    %[seq_results(1,1).MicroMOGS_corr,seq_results(1,1).MicroMONGS_corr]= Micro_Micro_gains_key(interval12_corr,interval45_corr,flag_continuous_seq);
+    [seq_results(1,1).MicroMOGS_corr,seq_results(1,1).MicroMONGS_corr]= Micro_Micro_gains_key(interval12_corr,interval45_corr,flag_continuous_seq);
 end
 
 %%

@@ -55,8 +55,8 @@ micro_mogs_group=[]; micro_mogs_acumulado_group=[];
 micro_mongs_group=[]; micro_mongs_acumulado_group=[];
 
 % Micro Micro Gains Filtered
-% micro_mogs_group_corr=[]; micro_mogs_acumulado_group_corr=[];
-% micro_mongs_group_corr=[]; micro_mongs_acumulado_group_corr=[];
+micro_mogs_group_corr=[]; micro_mogs_acumulado_group_corr=[];
+micro_mongs_group_corr=[]; micro_mongs_acumulado_group_corr=[];
 
 % Interkey_Matrix - Learning curve per trial
 interkey_mat=[]; interkey_mat_corr=[];
@@ -68,9 +68,40 @@ media_MicroMOGS_acum_group=[]; media_MicroMONGS_acum_group=[];
 mediana_MicroMOGS_group=[]; mediana_MicroMONGS_group=[];
 mediana_MicroMOGS_acum_group=[]; mediana_MicroMONGS_acum_group=[];
 
+media_MicroMOGS_corr_group=[]; media_MicroMONGS_corr_group=[];
+media_MicroMOGS_corr_acum_group=[]; media_MicroMONGS_corr_acum_group=[];
+mediana_MicroMOGS_corr_group=[]; mediana_MicroMONGS_corr_group=[];
+mediana_MicroMOGS_corr_acum_group=[]; mediana_MicroMONGS_corr_acum_group=[];
 %GC 7/8/23
 %MicroMOGS_visual_group=[]; MicroMONGS_visual_group=[]; 
 
+%GC 15/12/23
+%Intervalos
+Int12_MeanPerBlock_group=[];Int23_MeanPerBlock_group=[];Int34_MeanPerBlock_group=[];Int45_MeanPerBlock_group=[];
+Int12_MeanPerBlock_corr_group=[];Int23_MeanPerBlock_corr_group=[];Int34_MeanPerBlock_corr_group=[];Int45_MeanPerBlock_corr_group=[];
+
+Int12_MedianPerBlock_group=[];Int23_MedianPerBlock_group=[];Int34_MedianPerBlock_group=[];Int45_MedianPerBlock_group=[];
+Int12_MedianPerBlock_corr_group=[];Int23_MedianPerBlock_corr_group=[];Int34_MedianPerBlock_corr_group=[];Int45_MedianPerBlock_corr_group=[];
+
+%GC 20/12/23
+%intervalos pero con visualizacion de bonstrup
+Int12_visual_group=[]; Int23_visual_group=[]; Int34_visual_group=[]; Int45_visual_group=[];
+Int12_visual_corr_group=[]; Int23_visual_corr_group=[]; Int34_visual_corr_group=[]; Int45_visual_corr_group=[];
+
+%% visualizacion de los intervalos
+% los calculo aca para no tener que pasar a todos los sujetos de nuevo por
+% el analisis pero deberia ser parte del analisis individual
+for i=1:length(SUJETOS)
+    Int12_visual_group(i,:)=Visualization_LearningCurve(SUJETOS(i).S.seq_results.intervalo_12,SUJETOS(i).S.seq_results.seqduration,SUJETOS(i).S.seq_results);
+    Int23_visual_group(i,:)=Visualization_LearningCurve(SUJETOS(i).S.seq_results.intervalo_23,SUJETOS(i).S.seq_results.seqduration,SUJETOS(i).S.seq_results);
+    Int34_visual_group(i,:)=Visualization_LearningCurve(SUJETOS(i).S.seq_results.intervalo_34,SUJETOS(i).S.seq_results.seqduration,SUJETOS(i).S.seq_results);
+    Int45_visual_group(i,:)=Visualization_LearningCurve(SUJETOS(i).S.seq_results.intervalo_45,SUJETOS(i).S.seq_results.seqduration,SUJETOS(i).S.seq_results);
+    
+    Int12_visual_corr_group(i,:)=Visualization_LearningCurve(SUJETOS(i).S.seq_results.intervalo_12_corr,SUJETOS(i).S.seq_results.seqduration,SUJETOS(i).S.seq_results);
+    Int23_visual_corr_group(i,:)=Visualization_LearningCurve(SUJETOS(i).S.seq_results.intervalo_23_corr,SUJETOS(i).S.seq_results.seqduration,SUJETOS(i).S.seq_results);
+    Int34_visual_corr_group(i,:)=Visualization_LearningCurve(SUJETOS(i).S.seq_results.intervalo_34_corr,SUJETOS(i).S.seq_results.seqduration,SUJETOS(i).S.seq_results);
+    Int45_visual_corr_group(i,:)=Visualization_LearningCurve(SUJETOS(i).S.seq_results.intervalo_45_corr,SUJETOS(i).S.seq_results.seqduration,SUJETOS(i).S.seq_results);
+end
 
 %% reorganización de matrices
 
@@ -106,83 +137,49 @@ if strcmp(paradigm_flag,'tiempo')==1
         %MICRO MICRO ONLINE
         SUJETOS(i).S.seq_results.MicroMONGS=[SUJETOS(i).S.seq_results.MicroMONGS columnas_nan]; 
         SUJETOS(i).S.seq_results.MicroMongs_acum=[SUJETOS(i).S.seq_results.MicroMongs_acum columnas_nan];
-        
+         
         
         if SUJETOS(i).S.seq_results.flag_norm==1 || SUJETOS(i).S.seq_results.flag_filt==1
             
             SUJETOS(i).S.seq_results.IKI_per_trial_corr=[SUJETOS(i).S.seq_results.IKI_per_trial_corr columnas_nan];
             
-            %SUJETOS(i).S.seq_results.MicroMOGS_corr=[SUJETOS(i).S.seq_results.MicroMOGS_corr columnas_nan];
-%            SUJETOS(i).S.seq_results.MicroMogs_corr_acum=[SUJETOS(i).S.seq_results.MicroMogs_corr_acum columnas_nan];
+            SUJETOS(i).S.seq_results.MicroMOGS_corr=[SUJETOS(i).S.seq_results.MicroMOGS_corr columnas_nan];
+           SUJETOS(i).S.seq_results.MicroMogs_corr_acum=[SUJETOS(i).S.seq_results.MicroMogs_corr_acum columnas_nan];
             
-            %SUJETOS(i).S.seq_results.MicroMONGS_corr=[SUJETOS(i).S.seq_results.MicroMONGS_corr columnas_nan];
- %           SUJETOS(i).S.seq_results.MicroMongs_corr_acum=[SUJETOS(i).S.seq_results.MicroMongs_corr_acum columnas_nan];  
+            SUJETOS(i).S.seq_results.MicroMONGS_corr=[SUJETOS(i).S.seq_results.MicroMONGS_corr columnas_nan];
+           SUJETOS(i).S.seq_results.MicroMongs_corr_acum=[SUJETOS(i).S.seq_results.MicroMongs_corr_acum columnas_nan];  
 
         end
         
     end
+   
+end
+
+% A los intervalos le calculo la media / mediana por bloque 
+
+for i=1:length(SUJETOS)
+    SUJETOS(i).S.seq_results.media_por_bloque_int12=nanmean(SUJETOS(i).S.seq_results.intervalo_12,2);
+    SUJETOS(i).S.seq_results.media_por_bloque_int23=nanmean(SUJETOS(i).S.seq_results.intervalo_23,2);
+    SUJETOS(i).S.seq_results.media_por_bloque_int34=nanmean(SUJETOS(i).S.seq_results.intervalo_34,2);
+    SUJETOS(i).S.seq_results.media_por_bloque_int45=nanmean(SUJETOS(i).S.seq_results.intervalo_45,2);
     
+    SUJETOS(i).S.seq_results.mediana_por_bloque_int12=nanmedian(SUJETOS(i).S.seq_results.intervalo_12,2);
+    SUJETOS(i).S.seq_results.mediana_por_bloque_int23=nanmedian(SUJETOS(i).S.seq_results.intervalo_23,2);
+    SUJETOS(i).S.seq_results.mediana_por_bloque_int34=nanmedian(SUJETOS(i).S.seq_results.intervalo_34,2);
+    SUJETOS(i).S.seq_results.mediana_por_bloque_int45=nanmedian(SUJETOS(i).S.seq_results.intervalo_45,2);
     
-    
-%     %si el bloque corta por tiempo debo reorganizar el vector IKI_TRIAL para llevarlo a IKI_GROUP
-%     
-%     % PARA LA DATA CRUDA
-%     %Busco el sujeto que màs secuencias haya hecho midiendo la cantidad de columnas de la matriz IKI_TRIAL_MATRIX
-%     max_seq=12;
-%     for i=1:length(SUJETOS)
-%         if size(SUJETOS(i).S.seq_results.IKI_per_trial,2)>max_seq
-%             %si encuentra un sujeto que haya hecho màs secuencias
-%             max_seq=size(SUJETOS(i).S.seq_results.IKI_per_trial,2);
-%         end
-%     end
-%     
-%     %completo a las matrices de los otros sujetos con columnas de NaN asì
-%     %todos tienen la mismas cantidad de columnas, sabiendo que el bloque
-%     %termina en max_seq
-%     
-%     for i=1:length(SUJETOS)
-%         %filas= cantidad de bloques
-%         %columnas= la diferencia entre el màximo y el actual
-%         columnas_nan=nan(size(SUJETOS(i).S.seq_results.IKI_per_trial,1),max_seq-size(SUJETOS(i).S.seq_results.IKI_per_trial,2));
-%         SUJETOS(i).S.seq_results.IKI_per_trial=[SUJETOS(i).S.seq_results.IKI_per_trial columnas_nan];
-%     end
-%     
-%     %Pongo todas las matrices en 1 fila para poder hacer la comparaciòn
-%     %entre sujetos, sabiendo que el bloque termina en max_seq. Ahora en el
-%     %medio van a quedar los NaN's. No va a ser un gràfico continuo
-% %     for i=1:length(SUJETOS)
-% %         SUJETOS(i).S.seq_results.IKI_per_trial=reshape(SUJETOS(i).S.seq_results.IKI_per_trial',1, []);
-% %     end
-%     
-%     clear max_seq; clear columnas_nan;
-%     %PARA LA DATA FILTRADA
-%     
-%     %Busco el sujeto que màs secuencias haya hecho midiendo la cantidad de columnas de la matriz IKI_TRIAL_MATRIX
-%     max_seq=12;
-%     for i=1:length(SUJETOS)
-%         if size(SUJETOS(i).S.seq_results.IKI_per_trial_corr,2)>max_seq
-%             %si encuentra un sujeto que haya hecho màs secuencias
-%             max_seq=size(SUJETOS(i).S.seq_results.IKI_per_trial_corr,2);
-%         end
-%     end
-%     
-%     %completo a las matrices de los otros sujetos con columnas de NaN asì
-%     %todos tienen la mismas cantidad de columnas, sabiendo que el bloque
-%     %termina en max_seq
-%     
-%     for i=1:length(SUJETOS)
-%         %filas= cantidad de bloques
-%         %columnas= la diferencia entre el màximo y el actual
-%         columnas_nan=nan(size(SUJETOS(i).S.seq_results.IKI_per_trial_corr,1),max_seq-size(SUJETOS(i).S.seq_results.IKI_per_trial_corr,2));
-%         SUJETOS(i).S.seq_results.IKI_per_trial_corr=[SUJETOS(i).S.seq_results.IKI_per_trial_corr columnas_nan];
-%     end
-%     
-%     %Pongo todas las matrices en 1 fila para poder hacer la comparaciòn
-%     %entre sujetos, sabiendo que el bloque termina en max_seq. Ahora en el
-%     %medio van a quedar los NaN's. No va a ser un gràfico continuo
-% %     for i=1:length(SUJETOS)
-% %         SUJETOS(i).S.seq_results.IKI_per_trial_corr=reshape(SUJETOS(i).S.seq_results.IKI_per_trial_corr',1, []);
-% %     end
+     if SUJETOS(i).S.seq_results.flag_norm==1 || SUJETOS(i).S.seq_results.flag_filt==1
+        
+         SUJETOS(i).S.seq_results.media_por_bloque_int12_corr=nanmean(SUJETOS(i).S.seq_results.intervalo_12_corr,2);
+         SUJETOS(i).S.seq_results.media_por_bloque_int23_corr=nanmean(SUJETOS(i).S.seq_results.intervalo_23_corr,2);
+         SUJETOS(i).S.seq_results.media_por_bloque_int34_corr=nanmean(SUJETOS(i).S.seq_results.intervalo_34_corr,2);
+         SUJETOS(i).S.seq_results.media_por_bloque_int45_corr=nanmean(SUJETOS(i).S.seq_results.intervalo_45_corr,2);
+         
+         SUJETOS(i).S.seq_results.mediana_por_bloque_int12_corr=nanmedian(SUJETOS(i).S.seq_results.intervalo_12_corr,2);
+         SUJETOS(i).S.seq_results.mediana_por_bloque_int23_corr=nanmedian(SUJETOS(i).S.seq_results.intervalo_23_corr,2);
+         SUJETOS(i).S.seq_results.mediana_por_bloque_int34_corr=nanmedian(SUJETOS(i).S.seq_results.intervalo_34_corr,2);
+         SUJETOS(i).S.seq_results.mediana_por_bloque_int45_corr=nanmedian(SUJETOS(i).S.seq_results.intervalo_45_corr,2);
+     end
 end
 
 % Matriz IKI_per_trial y a los micro micro - la pongo en una fila para poder graficarla. Los vector es de noBlock x noSeq
@@ -195,17 +192,37 @@ for i=1:length(SUJETOS)
     SUJETOS(i).S.seq_results.MicroMogs_acum=reshape(SUJETOS(i).S.seq_results.MicroMogs_acum',1,[]);
     SUJETOS(i).S.seq_results.MicroMongs_acum=reshape(SUJETOS(i).S.seq_results.MicroMongs_acum',1,[]);
     
+    SUJETOS(i).S.seq_results.media_por_bloque_int12=SUJETOS(i).S.seq_results.media_por_bloque_int12';
+    SUJETOS(i).S.seq_results.media_por_bloque_int23=SUJETOS(i).S.seq_results.media_por_bloque_int23';
+    SUJETOS(i).S.seq_results.media_por_bloque_int34=SUJETOS(i).S.seq_results.media_por_bloque_int34';
+    SUJETOS(i).S.seq_results.media_por_bloque_int45=SUJETOS(i).S.seq_results.media_por_bloque_int45';
+    
+    SUJETOS(i).S.seq_results.mediana_por_bloque_int12=SUJETOS(i).S.seq_results.mediana_por_bloque_int12';
+    SUJETOS(i).S.seq_results.mediana_por_bloque_int23=SUJETOS(i).S.seq_results.mediana_por_bloque_int23';
+    SUJETOS(i).S.seq_results.mediana_por_bloque_int34=SUJETOS(i).S.seq_results.mediana_por_bloque_int34';
+    SUJETOS(i).S.seq_results.mediana_por_bloque_int45=SUJETOS(i).S.seq_results.mediana_por_bloque_int45';
+
+    
     %GC 11/6/2203
     if SUJETOS(i).S.seq_results.flag_norm==1 || SUJETOS(i).S.seq_results.flag_filt==1
        
         SUJETOS(i).S.seq_results.IKI_per_trial_corr=reshape(SUJETOS(i).S.seq_results.IKI_per_trial_corr',1,[]);
         
-%         SUJETOS(i).S.seq_results.MicroMOGS_corr=reshape(SUJETOS(i).S.seq_results.MicroMOGS_corr',1,[]);
-%         SUJETOS(i).S.seq_results.MicroMONGS_corr=reshape(SUJETOS(i).S.seq_results.MicroMONGS_corr',1,[]);
-% 
-%         SUJETOS(i).S.seq_results.MicroMogs_corr_acum=reshape(SUJETOS(i).S.seq_results.MicroMogs_corr_acum',1,[]);
-%         SUJETOS(i).S.seq_results.MicroMongs_corr_acum=reshape(SUJETOS(i).S.seq_results.MicroMongs_corr_acum',1,[]);
+        SUJETOS(i).S.seq_results.MicroMOGS_corr=reshape(SUJETOS(i).S.seq_results.MicroMOGS_corr',1,[]);
+        SUJETOS(i).S.seq_results.MicroMONGS_corr=reshape(SUJETOS(i).S.seq_results.MicroMONGS_corr',1,[]);
+
+        SUJETOS(i).S.seq_results.MicroMogs_corr_acum=reshape(SUJETOS(i).S.seq_results.MicroMogs_corr_acum',1,[]);
+        SUJETOS(i).S.seq_results.MicroMongs_corr_acum=reshape(SUJETOS(i).S.seq_results.MicroMongs_corr_acum',1,[]);
         
+        SUJETOS(i).S.seq_results.media_por_bloque_int12_corr=SUJETOS(i).S.seq_results.media_por_bloque_int12_corr';
+        SUJETOS(i).S.seq_results.media_por_bloque_int23_corr=SUJETOS(i).S.seq_results.media_por_bloque_int23_corr';
+        SUJETOS(i).S.seq_results.media_por_bloque_int34_corr=SUJETOS(i).S.seq_results.media_por_bloque_int34_corr';
+        SUJETOS(i).S.seq_results.media_por_bloque_int45_corr=SUJETOS(i).S.seq_results.media_por_bloque_int45_corr';
+
+        SUJETOS(i).S.seq_results.mediana_por_bloque_int12_corr=SUJETOS(i).S.seq_results.mediana_por_bloque_int12_corr';
+        SUJETOS(i).S.seq_results.mediana_por_bloque_int23_corr=SUJETOS(i).S.seq_results.mediana_por_bloque_int23_corr';
+        SUJETOS(i).S.seq_results.mediana_por_bloque_int34_corr=SUJETOS(i).S.seq_results.mediana_por_bloque_int34_corr';
+        SUJETOS(i).S.seq_results.mediana_por_bloque_int45_corr=SUJETOS(i).S.seq_results.mediana_por_bloque_int45_corr';
     end
 
     
@@ -251,9 +268,31 @@ end
     mediana_MicroMOGS_acum_group=[mediana_MicroMOGS_acum_group;SUJETOS(i).S.seq_results.mediana_MicroMogs_acum];
     mediana_MicroMONGS_acum_group=[mediana_MicroMONGS_acum_group;SUJETOS(i).S.seq_results.mediana_MicroMongs_acum];
  
+    % data corregida
+    media_MicroMOGS_corr_group=[media_MicroMOGS_corr_group;SUJETOS(i).S.seq_results.media_MicroMogs_corr];
+    media_MicroMONGS_corr_group=[media_MicroMONGS_corr_group;SUJETOS(i).S.seq_results.media_MicroMongs_corr];
+    media_MicroMOGS_corr_acum_group=[media_MicroMOGS_corr_acum_group;SUJETOS(i).S.seq_results.media_MicroMogs_corr_acum];
+    media_MicroMONGS_corr_acum_group=[media_MicroMONGS_corr_acum_group;SUJETOS(i).S.seq_results.media_MicroMongs_corr_acum];
+    
+    mediana_MicroMOGS_corr_group=[mediana_MicroMOGS_corr_group;SUJETOS(i).S.seq_results.mediana_MicroMogs_corr];
+    mediana_MicroMONGS_corr_group=[mediana_MicroMONGS_corr_group;SUJETOS(i).S.seq_results.mediana_MicroMongs_corr];
+    mediana_MicroMOGS_corr_acum_group=[mediana_MicroMOGS_corr_acum_group;SUJETOS(i).S.seq_results.mediana_MicroMogs_corr_acum];
+    mediana_MicroMONGS_corr_acum_group=[mediana_MicroMONGS_corr_acum_group;SUJETOS(i).S.seq_results.mediana_MicroMongs_corr_acum];
      % GC 7/8/23
 %      MicroMOGS_visual_group=[MicroMOGS_visual_group;SUJETOS(i).S.seq_results.MicroMOGS_visual];
 %      MicroMONGS_visual_group=[MicroMONGS_visual_group;SUJETOS(i).S.seq_results.MicroMONGS_visual];
+    
+    %INTERVALOS GC 15/12/23
+    Int12_MeanPerBlock_group=[Int12_MeanPerBlock_group;SUJETOS(i).S.seq_results.media_por_bloque_int12];
+    Int23_MeanPerBlock_group=[Int23_MeanPerBlock_group;SUJETOS(i).S.seq_results.media_por_bloque_int23];
+    Int34_MeanPerBlock_group=[Int34_MeanPerBlock_group;SUJETOS(i).S.seq_results.media_por_bloque_int34];
+    Int45_MeanPerBlock_group=[Int45_MeanPerBlock_group;SUJETOS(i).S.seq_results.media_por_bloque_int45];
+
+    Int12_MedianPerBlock_group=[Int12_MedianPerBlock_group;SUJETOS(i).S.seq_results.mediana_por_bloque_int12];
+    Int23_MedianPerBlock_group=[Int23_MedianPerBlock_group;SUJETOS(i).S.seq_results.mediana_por_bloque_int23];
+    Int34_MedianPerBlock_group=[Int34_MedianPerBlock_group;SUJETOS(i).S.seq_results.mediana_por_bloque_int34];
+    Int45_MedianPerBlock_group=[Int45_MedianPerBlock_group;SUJETOS(i).S.seq_results.mediana_por_bloque_int45];
+    
     
     if SUJETOS(i).S.seq_results.flag_norm==1 || SUJETOS(i).S.seq_results.flag_filt==1
         %GC 11/6/2023
@@ -267,11 +306,21 @@ end
         TL_group_corr=[TL_group_corr;SUJETOS(i).S.seq_results.Total_Learning_corr];
         TL_acumulado_group_corr=[TL_acumulado_group_corr;SUJETOS(i).S.seq_results.Total_Learning_acumulativo_corr];
     
-%         micro_mogs_group_corr=[micro_mogs_group_corr;SUJETOS(i).S.seq_results.MicroMOGS_corr];
-%         micro_mongs_group_corr=[micro_mongs_group_corr;SUJETOS(i).S.seq_results.MicroMONGS_corr];
-%         micro_mogs_acumulado_group_corr=[micro_mogs_acumulado_group_corr;SUJETOS(i).S.seq_results.MicroMogs_corr_acum];
-%         micro_mongs_acumulado_group_corr=[micro_mongs_acumulado_group_corr;SUJETOS(i).S.seq_results.MicroMongs_corr_acum];
+        micro_mogs_group_corr=[micro_mogs_group_corr;SUJETOS(i).S.seq_results.MicroMOGS_corr];
+        micro_mongs_group_corr=[micro_mongs_group_corr;SUJETOS(i).S.seq_results.MicroMONGS_corr];
+        micro_mogs_acumulado_group_corr=[micro_mogs_acumulado_group_corr;SUJETOS(i).S.seq_results.MicroMogs_corr_acum];
+        micro_mongs_acumulado_group_corr=[micro_mongs_acumulado_group_corr;SUJETOS(i).S.seq_results.MicroMongs_corr_acum];
         
+        %INTERVALOS GC 15/12/23
+        Int12_MeanPerBlock_corr_group=[Int12_MeanPerBlock_corr_group;SUJETOS(i).S.seq_results.media_por_bloque_int12_corr];
+        Int23_MeanPerBlock_corr_group=[Int23_MeanPerBlock_corr_group;SUJETOS(i).S.seq_results.media_por_bloque_int23_corr];
+        Int34_MeanPerBlock_corr_group=[Int34_MeanPerBlock_corr_group;SUJETOS(i).S.seq_results.media_por_bloque_int34_corr];
+        Int45_MeanPerBlock_corr_group=[Int45_MeanPerBlock_corr_group;SUJETOS(i).S.seq_results.media_por_bloque_int45_corr];
+        
+        Int12_MedianPerBlock_corr_group=[Int12_MedianPerBlock_corr_group;SUJETOS(i).S.seq_results.mediana_por_bloque_int12_corr];
+        Int23_MedianPerBlock_corr_group=[Int23_MedianPerBlock_corr_group;SUJETOS(i).S.seq_results.mediana_por_bloque_int23_corr];
+        Int34_MedianPerBlock_corr_group=[Int34_MedianPerBlock_corr_group;SUJETOS(i).S.seq_results.mediana_por_bloque_int34_corr];
+        Int45_MedianPerBlock_corr_group=[Int45_MedianPerBlock_corr_group;SUJETOS(i).S.seq_results.mediana_por_bloque_int45_corr];
     end
 
 
@@ -302,6 +351,23 @@ Group_Parameters.micro_mongs_acumulado_group=micro_mongs_acumulado_group;
 % Group_Parameters.MicroMOGS_visual_group=MicroMOGS_visual_group;
 % Group_Parameters.MicroMONGS_visual_group=MicroMONGS_visual_group;
 
+%16/12/23
+Group_Parameters.Int12_MeanPerBlock_group=Int12_MeanPerBlock_group;
+Group_Parameters.Int23_MeanPerBlock_group=Int23_MeanPerBlock_group;
+Group_Parameters.Int34_MeanPerBlock_group=Int34_MeanPerBlock_group;
+Group_Parameters.Int45_MeanPerBlock_group=Int45_MeanPerBlock_group;
+
+Group_Parameters.Int12_MedianPerBlock_group=Int12_MedianPerBlock_group;
+Group_Parameters.Int23_MedianPerBlock_group=Int23_MedianPerBlock_group;
+Group_Parameters.Int34_MedianPerBlock_group=Int34_MedianPerBlock_group;
+Group_Parameters.Int45_MedianPerBlock_group=Int45_MedianPerBlock_group;
+
+Group_Parameters.Int12_visual_group=Int12_visual_group;
+Group_Parameters.Int23_visual_group=Int23_visual_group;
+Group_Parameters.Int34_visual_group=Int34_visual_group;
+Group_Parameters.Int45_visual_group=Int45_visual_group;
+
+
 %GC 11/6/2023
 if SUJETOS(i).S.seq_results.flag_norm==1 || SUJETOS(i).S.seq_results.flag_filt==1
     
@@ -319,6 +385,39 @@ if SUJETOS(i).S.seq_results.flag_norm==1 || SUJETOS(i).S.seq_results.flag_filt==
 %     Group_Parameters.micro_mogs_acumulado_group_corr=micro_mogs_acumulado_group_corr;
 %     Group_Parameters.micro_mongs_group_corr=micro_mongs_group_corr;
 %     Group_Parameters.micro_mongs_acumulado_group_corr=micro_mongs_acumulado_group_corr;
+
+    %GC 7/12/23
+    Group_Parameters.media_MicroMOGS_corr_group=media_MicroMOGS_corr_group;
+    Group_Parameters.media_MicroMONGS_corr_group=media_MicroMONGS_corr_group;
+
+    media_MicroMOGS_corr_acum_group(media_MicroMOGS_corr_acum_group==0)=NaN;
+    media_MicroMONGS_corr_acum_group(media_MicroMONGS_corr_acum_group==0)=NaN;
+    Group_Parameters.media_MicroMOGS_corr_acum_group=media_MicroMOGS_corr_acum_group;
+    Group_Parameters.media_MicroMONGS_corr_acum_group=media_MicroMONGS_corr_acum_group;
+
+    Group_Parameters.mediana_MicroMOGS_corr_group=mediana_MicroMOGS_corr_group;
+    Group_Parameters.mediana_MicroMONGS_corr_group=mediana_MicroMONGS_corr_group;
+
+    mediana_MicroMOGS_corr_acum_group(mediana_MicroMOGS_corr_acum_group==0)=NaN;
+    mediana_MicroMONGS_corr_acum_group(mediana_MicroMONGS_corr_acum_group==0)=NaN;
+    Group_Parameters.mediana_MicroMOGS_corr_acum_group=mediana_MicroMOGS_corr_acum_group;
+    Group_Parameters.mediana_MicroMONGS_corr_acum_group=mediana_MicroMONGS_corr_acum_group;
+    
+    %16/12/23
+    Group_Parameters.Int12_MeanPerBlock_corr_group=Int12_MeanPerBlock_corr_group;
+    Group_Parameters.Int23_MeanPerBlock_corr_group=Int23_MeanPerBlock_corr_group;
+    Group_Parameters.Int34_MeanPerBlock_corr_group=Int34_MeanPerBlock_corr_group;
+    Group_Parameters.Int45_MeanPerBlock_corr_group=Int45_MeanPerBlock_corr_group;
+    
+    Group_Parameters.Int12_MedianPerBlock_corr_group=Int12_MedianPerBlock_corr_group;
+    Group_Parameters.Int23_MedianPerBlock_corr_group=Int23_MedianPerBlock_corr_group;
+    Group_Parameters.Int34_MedianPerBlock_corr_group=Int34_MedianPerBlock_corr_group;
+    Group_Parameters.Int45_MedianPerBlock_corr_group=Int45_MedianPerBlock_corr_group;
+    
+    Group_Parameters.Int12_visual_corr_group=Int12_visual_corr_group;
+    Group_Parameters.Int23_visual_corr_group=Int23_visual_corr_group;
+    Group_Parameters.Int34_visual_corr_group=Int34_visual_corr_group;
+    Group_Parameters.Int45_visual_corr_group=Int45_visual_corr_group;
 end
 
  
@@ -371,7 +470,6 @@ else
 end
 
 
-
 %% clear workspace
 clear duration_group; clear seq_group; clear key_group; clear seq_group_num;
 clear iki_group; clear iki_group_corr;
@@ -395,7 +493,7 @@ Group_Results = Plot_Grupal_Figures(Group_Parameters,path,titulo,paradigm_flag,l
 %Group_Results.Group_Parameters = Group_Parameters;
 
 addpath('C:\Users\physi\Documents\Guada_2022\MSL guada\Task_MSL\stim-master\experiments\Funciones para analisis MSL\')
-[Group_Results.iki_interactivo_mean,Group_Parameters.iki_interactivo_group]=PlotInteractivo(SUJETOS,Group_Parameters,Group_Results,path);
+%[Group_Results.iki_interactivo_mean,Group_Parameters.iki_interactivo_group]=PlotInteractivo(SUJETOS,Group_Parameters,Group_Results,path);
 
 Group_Results.Group_Parameters = Group_Parameters;
 %% Guardo los datos en resultados

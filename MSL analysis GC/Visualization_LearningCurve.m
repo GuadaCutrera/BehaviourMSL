@@ -16,7 +16,8 @@
 function IKI_vector=Visualization_LearningCurve(IKI_trial,seqduration,seq_results)
 
 noBlock=size(IKI_trial,1);                                                  % cantidad de filas (bloques)
-durBlock=1000;                                                               %la paso de segundos a ms
+%durBlock=1000;                                                               %la paso de segundos a ms
+durBlock=10;                                                              %porque es el maximo de seq en cada grupo
 Block_vector=1:(noBlock*durBlock);                                          %por cada bloque tengo 10.000 puntos (10 seg)
 
 Div_block=NaN(1,noBlock);
@@ -63,18 +64,18 @@ end
 
 IKI_vector=reshape(IKI_vector',1,[]);
 
-figure; set(gcf,'Color','white'); box OFF; hold on;
-plot(Block_vector,IKI_vector)
-
-for i=1:durBlock:length(IKI_vector)
-    xline(i); %indicates a new block 
-end
-%xticks([500:1000:36500]);
-xticks([500:durBlock:36500]);
-xticklabels({'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',...
-    '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'})
-xlabel('Blocks','FontName','Arial','FontSize',12)
-ylabel('Interkeys interval','FontName','Arial','FontSize',12);
+% figure; set(gcf,'Color','white'); box OFF; hold on;
+% plot(Block_vector,IKI_vector)
+% 
+% for i=1:durBlock:length(IKI_vector)
+%     xline(i); %indicates a new block 
+% end
+% %xticks([500:durBlock:36500]);
+% xticks([5:durBlock:365]);
+% xticklabels({'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',...
+%     '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'})
+% xlabel('Blocks','FontName','Arial','FontSize',12)
+% ylabel('Interkeys interval','FontName','Arial','FontSize',12);
 
 
 

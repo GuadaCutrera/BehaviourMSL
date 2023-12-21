@@ -7,10 +7,12 @@
 function H=IKI_print(iki_visual_group,N)
 figure;
 
-durBlock=1000;                                                              % cantidad de puntos dentro de un bloque
-durRest=300;                                                                 %separacion visual entre bloques (cantidad de puntos a intercalar)
-color=['m','r','b','m','g','c','y','r','b','m','g','c','y','r','b','m','g','c','y','r','b','m','g','c','y','r','b','m','g','c','y','g'];
+% durBlock=1000;                                                              % cantidad de puntos dentro de un bloque
+% durRest=300;                                                                 %separacion visual entre bloques (cantidad de puntos a intercalar)
+color=['m','r','b','m','g','c','b','r','b','m','g','c','g','r','b','m','g','c','y','r','b','m','g','c','y','r','b','m','g','c','y','g'];
 
+durBlock=10;                                                              % cantidad de puntos dentro de un bloque
+durRest=3;
 %H=[];
 for i=1:N
     

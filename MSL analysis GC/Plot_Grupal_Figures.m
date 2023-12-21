@@ -19,6 +19,101 @@
 function Group_Results = Plot_Grupal_Figures(Group_Parameters,path,titulo,paradigm_flag,N)
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% FIGURE VISUALIZATION DE CADA TRANSICION POR SEPARDO.                %%%
+%%% Uso las mismas funciones que iki visual 
+%%%                 GC 20/12/23                                         %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Group_Results.Int12_visual_group_mean=nanmean(Group_Parameters.Int12_visual_group);
+Group_Results.Int12_visual_group_std=nanstd(Group_Parameters.Int12_visual_group)/sqrt(N);
+mad_12=mad(Group_Parameters.Int12_visual_group,1);
+Group_Results.Int23_visual_group_mean=nanmean(Group_Parameters.Int23_visual_group);
+Group_Results.Int23_visual_group_std=nanstd(Group_Parameters.Int23_visual_group)/sqrt(N);
+mad_23=mad(Group_Parameters.Int23_visual_group,1);
+Group_Results.Int34_visual_group_mean=nanmean(Group_Parameters.Int34_visual_group);
+Group_Results.Int34_visual_group_std=nanstd(Group_Parameters.Int34_visual_group)/sqrt(N);
+mad_34=mad(Group_Parameters.Int34_visual_group,1);
+Group_Results.Int45_visual_group_mean=nanmean(Group_Parameters.Int45_visual_group);
+Group_Results.Int45_visual_group_std=nanstd(Group_Parameters.Int45_visual_group)/sqrt(N);
+mad_45=mad(Group_Parameters.Int45_visual_group,1);
+% 
+Matriz_media=[Group_Results.Int12_visual_group_mean;Group_Results.Int23_visual_group_mean;Group_Results.Int34_visual_group_mean;Group_Results.Int45_visual_group_mean];
+Matriz_std=[Group_Results.Int12_visual_group_std;Group_Results.Int23_visual_group_std;Group_Results.Int34_visual_group_std;Group_Results.Int45_visual_group_std];
+% 
+% Matriz_media=[Group_Results.Int12_visual_group_mean;NaN(size(Group_Results.Int12_visual_group_mean));NaN(size(Group_Results.Int12_visual_group_mean));Group_Results.Int45_visual_group_mean];
+% Matriz_std=[Group_Results.Int12_visual_group_std;NaN(size(Group_Results.Int12_visual_group_mean));NaN(size(Group_Results.Int12_visual_group_mean));Group_Results.Int45_visual_group_std];
+
+
+LearningCompare(Matriz_media,Matriz_std,4)
+sgtitle([titulo ' - Learning Curve - Transiciones'])
+saveas(gcf,[path '_Intervalos_Visual_media.' 'fig']);
+saveas(gcf,[path '_Intervalos_Visual_media.' 'png']);
+% saveas(gcf,[path '_Intervalos_Visual_media_12_45.' 'fig']);
+% saveas(gcf,[path '_Intervalos_Visual_media_12_45.' 'png']);
+
+
+PlotInteractivo(Group_Parameters.Int12_visual_group,Group_Results.Int12_visual_group_mean,3*mad_12,'')
+sgtitle([titulo ' - Transicion 12'])
+saveas(gcf,[path '_Plot_completo_Int12.' 'fig']);
+saveas(gcf,[path '_Plot_completo_Int12.' 'png']);
+
+PlotInteractivo(Group_Parameters.Int23_visual_group,Group_Results.Int23_visual_group_mean,3*mad_23,'')
+sgtitle([titulo ' - Transicion 23'])
+saveas(gcf,[path '_Plot_completo_Int23.' 'fig']);
+saveas(gcf,[path '_Plot_completo_Int23.' 'png']);
+
+PlotInteractivo(Group_Parameters.Int34_visual_group,Group_Results.Int34_visual_group_mean,3*mad_34,'')
+sgtitle([titulo ' - Transicion 34'])
+saveas(gcf,[path '_Plot_completo_Int34.' 'fig']);
+saveas(gcf,[path '_Plot_completo_Int34.' 'png']);
+
+PlotInteractivo(Group_Parameters.Int45_visual_group,Group_Results.Int45_visual_group_mean,3*mad_45,'')
+sgtitle([titulo ' - Transicion 45'])
+saveas(gcf,[path '_Plot_completo_Int45.' 'fig']);
+saveas(gcf,[path '_Plot_completo_Int45.' 'png']);
+
+if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
+    Group_Results.Int12_visual_corr_group_mean=nanmean(Group_Parameters.Int12_visual_corr_group);
+    Group_Results.Int12_visual_corr_group_std=nanstd(Group_Parameters.Int12_visual_corr_group)/sqrt(N);
+    Group_Results.Int23_visual_corr_group_mean=nanmean(Group_Parameters.Int23_visual_corr_group);
+    Group_Results.Int23_visual_corr_group_std=nanstd(Group_Parameters.Int23_visual_corr_group)/sqrt(N);
+    Group_Results.Int34_visual_corr_group_mean=nanmean(Group_Parameters.Int34_visual_corr_group);
+    Group_Results.Int34_visual_corr_group_std=nanstd(Group_Parameters.Int34_visual_corr_group)/sqrt(N);
+    Group_Results.Int45_visual_corr_group_mean=nanmean(Group_Parameters.Int45_visual_corr_group);
+    Group_Results.Int45_visual_corr_group_std=nanstd(Group_Parameters.Int45_visual_corr_group)/sqrt(N);
+
+    Matriz_media=[Group_Results.Int12_visual_corr_group_mean;Group_Results.Int23_visual_corr_group_mean;Group_Results.Int34_visual_corr_group_mean;Group_Results.Int45_visual_corr_group_mean];
+    Matriz_std=[Group_Results.Int12_visual_corr_group_std;Group_Results.Int23_visual_corr_group_std;Group_Results.Int34_visual_corr_group_std;Group_Results.Int45_visual_corr_group_std];
+
+    LearningCompare(Matriz_media,Matriz_std,4)
+    sgtitle([titulo ' - Learning Curve - Transiciones corregido'])
+    saveas(gcf,[path '_Intervalos_Visual_media_corr.' 'fig']);
+    saveas(gcf,[path '_Intervalos_Visual_media_corr.' 'png']);
+
+    PlotInteractivo(Group_Parameters.Int12_visual_corr_group,Group_Results.Int12_visual_corr_group_mean,'')
+    sgtitle([titulo ' - Transicion 12_corr'])
+    saveas(gcf,[path '_Plot_completo_Int12_corr.' 'fig']);
+    saveas(gcf,[path '_Plot_completo_Int12_corr.' 'png']);
+
+    PlotInteractivo(Group_Parameters.Int23_visual_corr_group,Group_Results.Int23_visual_corr_group_mean,'')
+    sgtitle([titulo ' - Transicion 23 corregido'])
+    saveas(gcf,[path '_Plot_completo_Int23_corr.' 'fig']);
+    saveas(gcf,[path '_Plot_completo_Int23_corr.' 'png']);
+
+    PlotInteractivo(Group_Parameters.Int34_visual_corr_group,Group_Results.Int34_visual_corr_group_mean,'')
+    sgtitle([titulo ' - Transicion 34 corregido'])
+    saveas(gcf,[path '_Plot_completo_Int34_corr.' 'fig']);
+    saveas(gcf,[path '_Plot_completo_Int34_corr.' 'png']);
+
+    PlotInteractivo(Group_Parameters.Int45_visual_corr_group,Group_Results.Int45_visual_corr_group_mean,'')
+    sgtitle([titulo ' - Transicion 45 corregido'])
+    saveas(gcf,[path '_Plot_completo_Int45_corr.' 'fig']);
+    saveas(gcf,[path '_Plot_completo_Int45_corr.' 'png']);
+end
+
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                             FIGURE 1:                               %%%
 %%% Block Duraion: Time in between start of green cross and start of the%%%
 %%% red one.                                                            %%%
@@ -110,10 +205,10 @@ if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
     Group_Results.iki_group_corr_mean = nanmean(Group_Parameters.iki_group_corr,1);              
     Group_Results.iki_group_corr_std = nanstd(Group_Parameters.iki_group_corr,0,1)/sqrt(N);               
 
-%     InterKeyInterval_Plot_Grupal(Group_Results.iki_group_corr_mean,Group_Results.iki_group_corr_std,paradigm_flag,Group_Parameters,[titulo ' - ' Group_Parameters.titulo_analisis]);
-% 
-%     saveas(gcf,[path 'CurvaLearning_corr_Group.' 'fig']);
-%     saveas(gcf,[path 'CurvaLearning_corr_Group.' 'png']);
+     InterKeyInterval_Plot_Grupal(Group_Results.iki_group_corr_mean,Group_Results.iki_group_corr_std,paradigm_flag,Group_Parameters,[titulo ' - ' Group_Parameters.titulo_analisis]);
+
+    saveas(gcf,[path 'CurvaLearning_corr_Group.' 'fig']);
+    saveas(gcf,[path 'CurvaLearning_corr_Group.' 'png']);
     
 end % end si esta corregido
 %% 
@@ -456,16 +551,16 @@ MeanMicroMicroGains_Plot_Grupal(Group_Results.media_MicroMongs_mean,Group_Result
 Group_Results.media_MicroMongs_std,Group_Results.media_MicroMogs_std,Group_Results.media_MicroMogs_acum_mean,...
 Group_Results.media_MicroMongs_acum_mean,Group_Parameters.media_MicroMOGS_acum_group,Group_Parameters.media_MicroMONGS_acum_group,titulo,Group_Parameters,'mean')
 
-saveas(gcf,[path '_Mean_MicroMicroGains_media.' 'fig']);
-saveas(gcf,[path '_Mean_MicroMicroGains_media.' 'png']);
+saveas(gcf,[path '_Mean_MicroMicroGains_media_crudo.' 'fig']);
+saveas(gcf,[path '_Mean_MicroMicroGains_media_crudo.' 'png']);
 
 %mediana across subj
 MeanMicroMicroGains_Plot_Grupal(Group_Results.media_MicroMongs_median,Group_Results.media_MicroMogs_median,...
 Group_Results.media_MicroMongs_std,Group_Results.media_MicroMogs_std,Group_Results.media_MicroMogs_acum_median,...
 Group_Results.media_MicroMongs_acum_median,Group_Parameters.media_MicroMOGS_acum_group,Group_Parameters.media_MicroMONGS_acum_group,titulo,Group_Parameters,'mean')
 
-saveas(gcf,[path '_Mean_MicroMicroGains_mediana.' 'fig']);
-saveas(gcf,[path '_Mean_MicroMicroGains_mediana.' 'png']);
+saveas(gcf,[path '_Mean_MicroMicroGains_mediana_crudo.' 'fig']);
+saveas(gcf,[path '_Mean_MicroMicroGains_mediana_crudo.' 'png']);
 
 
 %%
@@ -500,16 +595,16 @@ MeanMicroMicroGains_Plot_Grupal(Group_Results.mediana_MicroMongs_mean,Group_Resu
 Group_Results.mediana_MicroMongs_std,Group_Results.mediana_MicroMogs_std,Group_Results.mediana_MicroMogs_acum_mean,...
 Group_Results.mediana_MicroMongs_acum_mean,Group_Parameters.mediana_MicroMOGS_acum_group,Group_Parameters.mediana_MicroMONGS_acum_group,titulo,Group_Parameters,'median')
 
-saveas(gcf,[path '_Median_MicroMicroGains_media.' 'fig']);
-saveas(gcf,[path '_Median_MicroMicroGains_media.' 'png']);
+saveas(gcf,[path '_Median_MicroMicroGains_media_crudo.' 'fig']);
+saveas(gcf,[path '_Median_MicroMicroGains_media_crudo.' 'png']);
 
 %mediana across subj
 MeanMicroMicroGains_Plot_Grupal(Group_Results.mediana_MicroMongs_median,Group_Results.mediana_MicroMogs_median,...
 Group_Results.mediana_MicroMongs_std,Group_Results.mediana_MicroMogs_std,Group_Results.mediana_MicroMogs_acum_median,...
 Group_Results.mediana_MicroMongs_acum_median,Group_Parameters.mediana_MicroMOGS_acum_group,Group_Parameters.mediana_MicroMONGS_acum_group,titulo,Group_Parameters,'median')
 
-saveas(gcf,[path '_Median_MicroMicroGains_mediana.' 'fig']);
-saveas(gcf,[path '_Median_MicroMicroGains_mediana.' 'png']);
+saveas(gcf,[path '_Median_MicroMicroGains_mediana_crudo.' 'fig']);
+saveas(gcf,[path '_Median_MicroMicroGains_mediana_crudo.' 'png']);
 
 
 %% 
@@ -647,14 +742,219 @@ saveas(gcf,[path '_tapping_speed_visual_crudo_Group.' 'png']);
 
 if Group_Parameters.flag_norm==1 || Group_Parameters.flag_filt==1
     
-    Group_Results.speed_visual_group_corr_mean = nanmean(1./Group_Parameters.iki_visual_group_corr,1);              
-    Group_Results.speed_visual_group_corr_std = nanstd(1./Group_Parameters.iki_visual_group_corr,0,1)/sqrt(N);
-    
-    %Visualization_Learning_Grupal(Group_Results.speed_visual_group_corr_mean,Group_Results.speed_visual_group_corr_std,'speed',[titulo ' - ' Group_Parameters.titulo_analisis]);
-    
-    %saveas(gcf,[path '_tapping_speed_visual_corr_Group.' 'fig']);
-    %saveas(gcf,[path '_tapping_speed_visual_corr_Group.' 'png']);
+%     Group_Results.speed_visual_group_corr_mean = nanmean(1./Group_Parameters.iki_visual_group_corr,1);              
+%     Group_Results.speed_visual_group_corr_std = nanstd(1./Group_Parameters.iki_visual_group_corr,0,1)/sqrt(N);
+%     
+%     Visualization_Learning_Grupal(Group_Results.speed_visual_group_corr_mean,Group_Results.speed_visual_group_corr_std,'speed',[titulo ' - ' Group_Parameters.titulo_analisis]);
+%     
+%     saveas(gcf,[path '_tapping_speed_visual_corr_Group.' 'fig']);
+%     saveas(gcf,[path '_tapping_speed_visual_corr_Group.' 'png']);
 end
+
+%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                            as Figure 13                             %%%
+%%%  Micro Micro Gains median value per block. Shown data is CORRECTED  %%%
+%%%  Non acumulative values are shown if data is normalized but acumulative
+%%%  values are not.                                                    %%%
+%%%                             GC 7/12/23                              %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%MOGS NO ACUM -------------------------------------------------------------
+Group_Results.media_MicroMogs_corr_mean=nanmean(Group_Parameters.media_MicroMOGS_corr_group);
+Group_Results.media_MicroMogs_corr_median=nanmedian(Group_Parameters.media_MicroMOGS_corr_group); %media por bloque - mediana across subj
+Group_Results.media_MicroMogs_corr_std=nanstd(Group_Parameters.media_MicroMOGS_corr_group)/sqrt(N); %error estandar
+
+%MONGS NO ACUM ------------------------------------------------------------
+Group_Results.media_MicroMongs_corr_mean=nanmean(Group_Parameters.media_MicroMONGS_corr_group);
+Group_Results.media_MicroMongs_corr_median=nanmedian(Group_Parameters.media_MicroMONGS_corr_group);
+Group_Results.media_MicroMongs_corr_std=nanstd(Group_Parameters.media_MicroMONGS_corr_group)/sqrt(N); %error estandar
+
+%MOGS ACUM ----------------------------------------------------------------
+Group_Results.media_MicroMogs_corr_acum_mean=nanmean(Group_Parameters.media_MicroMOGS_corr_acum_group);
+Group_Results.media_MicroMogs_corr_acum_median=nanmedian(Group_Parameters.media_MicroMOGS_corr_acum_group);
+Group_Results.media_MicroMogs_corr_acum_std=nanstd(Group_Parameters.media_MicroMOGS_corr_acum_group)/sqrt(N); %error estandar
+
+%MONGS ACUM ---------------------------------------------------------------
+Group_Results.media_MicroMongs_corr_acum_mean=nanmean(Group_Parameters.media_MicroMONGS_corr_acum_group);
+Group_Results.media_MicroMongs_corr_acum_median=nanmedian(Group_Parameters.media_MicroMONGS_corr_acum_group);
+Group_Results.media_MicroMongs_corr_acum_std=nanstd(Group_Parameters.media_MicroMONGS_corr_acum_group)/sqrt(N); %error estandar
+
+%media across subj
+MeanMicroMicroGains_Plot_Grupal(Group_Results.media_MicroMongs_corr_mean,Group_Results.media_MicroMogs_corr_mean,...
+Group_Results.media_MicroMongs_corr_std,Group_Results.media_MicroMogs_corr_std,Group_Results.media_MicroMogs_corr_acum_mean,...
+Group_Results.media_MicroMongs_corr_acum_mean,Group_Parameters.media_MicroMOGS_corr_acum_group,Group_Parameters.media_MicroMONGS_corr_acum_group,titulo,Group_Parameters,'mean')
+
+saveas(gcf,[path '_Mean_MicroMicroGains_media_corr.' 'fig']);
+saveas(gcf,[path '_Mean_MicroMicroGains_media_corr.' 'png']);
+
+%mediana across subj
+MeanMicroMicroGains_Plot_Grupal(Group_Results.media_MicroMongs_corr_median,Group_Results.media_MicroMogs_corr_median,...
+Group_Results.media_MicroMongs_corr_std,Group_Results.media_MicroMogs_corr_std,Group_Results.media_MicroMogs_corr_acum_median,...
+Group_Results.media_MicroMongs_corr_acum_median,Group_Parameters.media_MicroMOGS_corr_acum_group,Group_Parameters.media_MicroMONGS_corr_acum_group,titulo,Group_Parameters,'mean')
+
+saveas(gcf,[path '_Mean_MicroMicroGains_mediana_corr.' 'fig']);
+saveas(gcf,[path '_Mean_MicroMicroGains_mediana_corr.' 'png']);
+
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                           as  Figure 13 but corrected               %%%
+%%%  Same as previous figure but with median value per block            %%%
+%%%                             GC 7/9/23                               %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%MOGS NO ACUM -------------------------------------------------------------
+Group_Results.mediana_MicroMogs_corr_mean=nanmean(Group_Parameters.mediana_MicroMOGS_corr_group);
+Group_Results.mediana_MicroMogs_corr_median=nanmedian(Group_Parameters.mediana_MicroMOGS_corr_group); %mediana por bloque - mediana across subj
+Group_Results.mediana_MicroMogs_corr_std=nanstd(Group_Parameters.mediana_MicroMOGS_corr_group)/sqrt(N); %error estandar
+
+%MONGS NO ACUM ------------------------------------------------------------
+Group_Results.mediana_MicroMongs_corr_mean=nanmean(Group_Parameters.mediana_MicroMONGS_corr_group);
+Group_Results.mediana_MicroMongs_corr_median=nanmedian(Group_Parameters.mediana_MicroMONGS_corr_group);
+Group_Results.mediana_MicroMongs_corr_std=nanstd(Group_Parameters.mediana_MicroMONGS_corr_group)/sqrt(N); %error estandar
+
+%MOGS ACUM ----------------------------------------------------------------
+Group_Results.mediana_MicroMogs_corr_acum_mean=nanmean(Group_Parameters.mediana_MicroMOGS_corr_acum_group);
+Group_Results.mediana_MicroMogs_corr_acum_median=nanmedian(Group_Parameters.mediana_MicroMOGS_corr_acum_group);
+Group_Results.mediana_MicroMogs_corr_acum_std=nanstd(Group_Parameters.mediana_MicroMOGS_corr_acum_group)/sqrt(N); %error estandar
+
+%MONGS ACUM ---------------------------------------------------------------
+Group_Results.mediana_MicroMongs_corr_acum_mean=nanmean(Group_Parameters.mediana_MicroMONGS_corr_acum_group);
+Group_Results.mediana_MicroMongs_corr_acum_median=nanmedian(Group_Parameters.mediana_MicroMONGS_corr_acum_group);
+Group_Results.mediana_MicroMongs_corr_acum_std=nanstd(Group_Parameters.mediana_MicroMONGS_corr_acum_group)/sqrt(N); %error estandar
+
+% %media across subj
+MeanMicroMicroGains_Plot_Grupal(Group_Results.mediana_MicroMongs_corr_mean,Group_Results.mediana_MicroMogs_corr_mean,...
+Group_Results.mediana_MicroMongs_corr_std,Group_Results.mediana_MicroMogs_corr_std,Group_Results.mediana_MicroMogs_corr_acum_mean,...
+Group_Results.mediana_MicroMongs_corr_acum_mean,Group_Parameters.mediana_MicroMOGS_corr_acum_group,Group_Parameters.mediana_MicroMONGS_corr_acum_group,titulo,Group_Parameters,'median')
+
+saveas(gcf,[path '_Median_MicroMicroGains_media_corr.' 'fig']);
+saveas(gcf,[path '_Median_MicroMicroGains_media_corr.' 'png']);
+
+%mediana across subj
+MeanMicroMicroGains_Plot_Grupal(Group_Results.mediana_MicroMongs_corr_median,Group_Results.mediana_MicroMogs_corr_median,...
+Group_Results.mediana_MicroMongs_corr_std,Group_Results.mediana_MicroMogs_corr_std,Group_Results.mediana_MicroMogs_corr_acum_median,...
+Group_Results.mediana_MicroMongs_corr_acum_median,Group_Parameters.mediana_MicroMOGS_corr_acum_group,Group_Parameters.mediana_MicroMONGS_corr_acum_group,titulo,Group_Parameters,'median')
+
+saveas(gcf,[path '_Median_MicroMicroGains_mediana_corr.' 'fig']);
+saveas(gcf,[path '_Median_MicroMicroGains_mediana_corr.' 'png']);
+
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% FIGURE: PLOT INTERVALOS. Se plotean la media/mediana por bloque para
+%%% cada uno de los cuatro intervalos.                                  %%%
+%%%                     GC 16/12/23                                     %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%mediana original
+Group_Results.Int12_MedianPerBlock_group_mean=nanmean(Group_Parameters.Int12_MedianPerBlock_group,1);
+Group_Results.Int12_MedianPerBlock_group_std=nanstd(Group_Parameters.Int12_MedianPerBlock_group)/sqrt(N);
+Group_Results.Int23_MedianPerBlock_group_mean=nanmean(Group_Parameters.Int23_MedianPerBlock_group,1);
+Group_Results.Int23_MedianPerBlock_group_std=nanstd(Group_Parameters.Int23_MedianPerBlock_group)/sqrt(N);
+Group_Results.Int34_MedianPerBlock_group_mean=nanmean(Group_Parameters.Int34_MedianPerBlock_group,1);
+Group_Results.Int34_MedianPerBlock_group_std=nanstd(Group_Parameters.Int34_MedianPerBlock_group)/sqrt(N);
+Group_Results.Int45_MedianPerBlock_group_mean=nanmean(Group_Parameters.Int45_MedianPerBlock_group,1);
+Group_Results.Int45_MedianPerBlock_group_std=nanstd(Group_Parameters.Int45_MedianPerBlock_group)/sqrt(N);
+
+plot_intervalos(Group_Parameters.Int12_MedianPerBlock_group,Group_Parameters.Int23_MedianPerBlock_group,Group_Parameters.Int34_MedianPerBlock_group,...
+    Group_Parameters.Int45_MedianPerBlock_group,Group_Results.Int12_MedianPerBlock_group_mean,Group_Results.Int23_MedianPerBlock_group_mean,...
+    Group_Results.Int34_MedianPerBlock_group_mean,Group_Results.Int45_MedianPerBlock_group_mean,Group_Results.Int12_MedianPerBlock_group_std,...
+    Group_Results.Int23_MedianPerBlock_group_std,Group_Results.Int34_MedianPerBlock_group_std,Group_Results.Int45_MedianPerBlock_group_std,[titulo '- mediana por bloque - original'])
+
+gcf22=figure(22);
+saveas(gcf22,[path '_Intervals_MedianPerBlock.' 'fig']);
+saveas(gcf22,[path '_Intervals_MedianPerBlock.' 'png']);
+gcf23=figure(23);
+saveas(gcf23,[path '_Intervals_MedianPerBlock_completo.' 'fig']);
+saveas(gcf23,[path '_Intervals_MedianPerBlock_completo.' 'png']);
+
+%mediana corregida
+Group_Results.Int12_MedianPerBlock_group_corr_mean=nanmean(Group_Parameters.Int12_MedianPerBlock_corr_group,1);
+Group_Results.Int12_MedianPerBlock_group_corr_std=nanstd(Group_Parameters.Int12_MedianPerBlock_corr_group)/sqrt(N);
+Group_Results.Int23_MedianPerBlock_group_corr_mean=nanmean(Group_Parameters.Int23_MedianPerBlock_corr_group,1);
+Group_Results.Int23_MedianPerBlock_group_corr_std=nanstd(Group_Parameters.Int23_MedianPerBlock_corr_group)/sqrt(N);
+Group_Results.Int34_MedianPerBlock_group_corr_mean=nanmean(Group_Parameters.Int34_MedianPerBlock_corr_group,1);
+Group_Results.Int34_MedianPerBlock_group_corr_std=nanstd(Group_Parameters.Int34_MedianPerBlock_corr_group)/sqrt(N);
+Group_Results.Int45_MedianPerBlock_group_corr_mean=nanmean(Group_Parameters.Int45_MedianPerBlock_corr_group,1);
+Group_Results.Int45_MedianPerBlock_group_corr_std=nanstd(Group_Parameters.Int45_MedianPerBlock_corr_group)/sqrt(N);
+
+plot_intervalos(Group_Parameters.Int12_MedianPerBlock_corr_group,Group_Parameters.Int23_MedianPerBlock_corr_group,Group_Parameters.Int34_MedianPerBlock_corr_group,...
+    Group_Parameters.Int45_MedianPerBlock_corr_group,Group_Results.Int12_MedianPerBlock_group_corr_mean,Group_Results.Int23_MedianPerBlock_group_corr_mean,...
+    Group_Results.Int34_MedianPerBlock_group_corr_mean,Group_Results.Int45_MedianPerBlock_group_corr_mean,Group_Results.Int12_MedianPerBlock_group_corr_std,...
+    Group_Results.Int23_MedianPerBlock_group_corr_std,Group_Results.Int34_MedianPerBlock_group_corr_std,Group_Results.Int45_MedianPerBlock_group_corr_std,[titulo '- mediana por bloque - corregido'])
+
+gcf24=figure(24);
+saveas(gcf24,[path '_Intervals_MedianPerBlock_corr.' 'fig']);
+saveas(gcf24,[path '_Intervals_MedianPerBlock_corr.' 'png']);
+gcf25=figure(25);
+saveas(gcf25,[path '_Intervals_MedianPerBlock_completo_corr.' 'fig']);
+saveas(gcf25,[path '_Intervals_MedianPerBlock_completo_corr.' 'png']);
+
+%media original
+Group_Results.Int12_MeanPerBlock_group_mean=nanmean(Group_Parameters.Int12_MeanPerBlock_group,1);
+Group_Results.Int12_MeanPerBlock_group_std=nanstd(Group_Parameters.Int12_MeanPerBlock_group)/sqrt(N);
+Group_Results.Int23_MeanPerBlock_group_mean=nanmean(Group_Parameters.Int23_MeanPerBlock_group,1);
+Group_Results.Int23_MeanPerBlock_group_std=nanstd(Group_Parameters.Int23_MeanPerBlock_group)/sqrt(N);
+Group_Results.Int34_MeanPerBlock_group_mean=nanmean(Group_Parameters.Int34_MeanPerBlock_group,1);
+Group_Results.Int34_MeanPerBlock_group_std=nanstd(Group_Parameters.Int34_MeanPerBlock_group)/sqrt(N);
+Group_Results.Int45_MeanPerBlock_group_mean=nanmean(Group_Parameters.Int45_MeanPerBlock_group,1);
+Group_Results.Int45_MeanPerBlock_group_std=nanstd(Group_Parameters.Int45_MeanPerBlock_group)/sqrt(N);
+
+plot_intervalos(Group_Parameters.Int12_MeanPerBlock_group,Group_Parameters.Int23_MeanPerBlock_group,Group_Parameters.Int34_MeanPerBlock_group,...
+    Group_Parameters.Int45_MeanPerBlock_group,Group_Results.Int12_MeanPerBlock_group_mean,Group_Results.Int23_MeanPerBlock_group_mean,...
+    Group_Results.Int34_MeanPerBlock_group_mean,Group_Results.Int45_MeanPerBlock_group_mean,Group_Results.Int12_MeanPerBlock_group_std,...
+    Group_Results.Int23_MeanPerBlock_group_std,Group_Results.Int34_MeanPerBlock_group_std,Group_Results.Int45_MeanPerBlock_group_std,[titulo '- media por bloque - original'])
+
+gcf26=figure(26);
+saveas(gcf26,[path '_Intervals_MeanPerBlock.' 'fig']);
+saveas(gcf26,[path '_Intervals_MeanPerBlock.' 'png']);
+gcf27=figure(27);
+saveas(gcf27,[path '_Intervals_MeanPerBlock_completo.' 'fig']);
+saveas(gcf27,[path '_Intervals_MeanPerBlock_completo.' 'png']);
+
+%media corregida
+Group_Results.Int12_MeanPerBlock_group_corr_mean=nanmean(Group_Parameters.Int12_MeanPerBlock_corr_group,1);
+Group_Results.Int12_MeanPerBlock_group_corr_std=nanstd(Group_Parameters.Int12_MeanPerBlock_corr_group)/sqrt(N);
+Group_Results.Int23_MeanPerBlock_group_corr_mean=nanmean(Group_Parameters.Int23_MeanPerBlock_corr_group,1);
+Group_Results.Int23_MeanPerBlock_group_corr_std=nanstd(Group_Parameters.Int23_MeanPerBlock_corr_group)/sqrt(N);
+Group_Results.Int34_MeanPerBlock_group_corr_mean=nanmean(Group_Parameters.Int34_MeanPerBlock_corr_group,1);
+Group_Results.Int34_MeanPerBlock_group_corr_std=nanstd(Group_Parameters.Int34_MeanPerBlock_corr_group)/sqrt(N);
+Group_Results.Int45_MeanPerBlock_group_corr_mean=nanmean(Group_Parameters.Int45_MeanPerBlock_corr_group,1);
+Group_Results.Int45_MeanPerBlock_group_corr_std=nanstd(Group_Parameters.Int45_MeanPerBlock_corr_group)/sqrt(N);
+
+plot_intervalos(Group_Parameters.Int12_MeanPerBlock_corr_group,Group_Parameters.Int23_MeanPerBlock_corr_group,Group_Parameters.Int34_MeanPerBlock_corr_group,...
+    Group_Parameters.Int45_MeanPerBlock_corr_group,Group_Results.Int12_MeanPerBlock_group_corr_mean,Group_Results.Int23_MeanPerBlock_group_corr_mean,...
+    Group_Results.Int34_MeanPerBlock_group_corr_mean,Group_Results.Int45_MeanPerBlock_group_corr_mean,Group_Results.Int12_MeanPerBlock_group_corr_std,...
+    Group_Results.Int23_MeanPerBlock_group_corr_std,Group_Results.Int34_MeanPerBlock_group_corr_std,Group_Results.Int45_MeanPerBlock_group_corr_std,[titulo '- media por bloque - corregido'])
+gcf28=figure(28);
+saveas(gcf28,[path '_Intervals_MeanPerBlock_corr.' 'fig']);
+saveas(gcf28,[path '_Intervals_MeanPerBlock_corr.' 'png']);
+gcf29=figure(29);
+saveas(gcf29,[path '_Intervals_MeanPerBlock_completo_corr.' 'fig']);
+saveas(gcf29,[path '_Intervals_MeanPerBlock_completo_corr.' 'png']);
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% FIGURE VISUALIZATION DE CADA TRANSICION POR SEPARDO.                %%%
+%%% Uso las mismas funciones que iki visual 
+%%%                 GC 20/12/23                                         %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Group_Results.Int12_visual_group_mean=nanmean(Group_Parameters.Int12_visual_group);
+Group_Results.Int12_visual_group_std=nanstd(Group_Parameters.Int12_visual_group)/sqrt(N);
+Group_Results.Int23_visual_group_mean=nanmean(Group_Parameters.Int23_visual_group);
+Group_Results.Int23_visual_group_std=nanstd(Group_Parameters.Int23_visual_group)/sqrt(N);
+Group_Results.Int34_visual_group_mean=nanmean(Group_Parameters.Int34_visual_group);
+Group_Results.Int34_visual_group_std=nanstd(Group_Parameters.Int34_visual_group)/sqrt(N);
+Group_Results.Int45_visual_group_mean=nanmean(Group_Parameters.Int45_visual_group);
+Group_Results.Int45_visual_group_std=nanstd(Group_Parameters.Int45_visual_group)/sqrt(N);
+
+
+saveas(gcf,[path '_Intervalos_Visual_media.' 'fig']);
+saveas(gcf,[path '_Intervalos_Visual_media.' 'png']);
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

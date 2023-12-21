@@ -11,8 +11,11 @@ end
 figure; sgtitle(['Tapping Speed Comparison'])
 set(gcf,'Position',get(0,'ScreenSize'));
 
-durBlock=1000;                                                              % cantidad de puntos dentro de un bloque
-durRest=300;                                                                 %separacion visual entre bloques (cantidad de puntos a intercalar)
+% durBlock=1000;                                                              % cantidad de puntos dentro de un bloque
+% durRest=300;                                                                 %separacion visual entre bloques (cantidad de puntos a intercalar)
+
+durBlock=10;                                                              % cantidad de puntos dentro de un bloque
+durRest=3;                                                                 %separacion visual entre bloques (cantidad de puntos a intercalar)
 
 contBlock=0;
 
@@ -41,7 +44,8 @@ switch flag1st
     case '' %no se modifica el primer punto
         ylim([1 4.5]) % task wo intro
     case '0'
-        ylim([-0.2 1.8])
+        %ylim([-0.2 1.8])
+        ylim([-0.5 3])
     case '1'
         if flagIntro==0
             ylim([0.8 2]) %max =2 para cuando sacamos la intro del sujeto conflictivo, sino max=2.9
@@ -79,7 +83,8 @@ switch flag1st
     case ''
         ylim([1 4.5]) % task wo intro
     case '0'
-        ylim([-0.2 1.8])
+        %ylim([-0.2 1.8])
+        ylim([-0.5 3])
     case '1'
         if flagIntro==0
         ylim([0.8 2]) %max =2 para cuando sacamos la intro del sujeto conflictivo, sino max=2.9
@@ -98,11 +103,14 @@ if flagIntro==0
     xticklabels({'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',...
     '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'})
 else
-    xticks([500:1300:47500]);
+%     xticks([500:1300:47500]);
+%     xticklabels({'Intro','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',...
+%     '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'})
+    xlim([0 375])
+    xticks([5:13:395]);
     xticklabels({'Intro','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',...
-    '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'})
+    '21','22','23','24','25','26','27','28'})
 end
-
 if flagIntro==0
     titulo=' sin intro ';
 else
@@ -147,7 +155,8 @@ switch flag1st
             ylim([0.2 1]) % w intro
         end
     case '0'
-        ylim([-0.5 0.1])
+        %ylim([-0.5 0.1])
+        ylim([-0.3 0.5])
     case '1'
         if flagIntro==0
             ylim([0.5 1.1]) 
@@ -189,7 +198,8 @@ switch flag1st
             ylim([0.2 1]) % w intro
         end
     case '0'
-        ylim([-0.5 0.1])
+        %ylim([-0.5 0.1])
+        ylim([-0.3 0.5])
     case '1'
         if flagIntro==0
             ylim([0.5 1.1]) 
@@ -208,13 +218,26 @@ if flagIntro==0
     xticklabels({'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',...
     '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'})
 else
-    xticks([500:1300:47500]);
+%     xticks([500:1300:47500]);
+%     xticklabels({'Intro','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',...
+%     '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'})
+    xlim([0 375])
+    xticks([5:13:395]);
     xticklabels({'Intro','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',...
-    '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'})
+    '21','22','23','24','25','26','27','28'})
 end
-
+hold on;
 saveas(gcf,[path ['IKI_3axis' titulo '.'] 'fig']);
 saveas(gcf,[path ['IKI_3axis' titulo '.'] 'png']);
+
+
+% Invierto la curva de IKI para ver si se reproduce la de tapping speed
+sgtitle(['Interkey Interval Inverted Comparison'])
+ax.YDir = 'reverse';
+yyaxis left;
+ax.YDir = 'reverse';
+saveas(gcf,[path ['IKI_inverted_3axis' titulo '.'] 'fig']);
+saveas(gcf,[path ['IKI_inverted_3axis' titulo '.'] 'png']);
 
  %% PLOT MICRO GAINS
 % figure; sgtitle(['Micro Gains Comparison'])

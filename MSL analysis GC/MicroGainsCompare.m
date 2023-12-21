@@ -5,7 +5,8 @@ set(gcf,'Position',get(0,'ScreenSize'));
 if flagIntro==0
     x_lim=[0 36];
 else
-    x_lim=[0 37];
+    %x_lim=[0 37];
+    x_lim=[0 29];
 end
 switch flag1st
     case ''
@@ -13,7 +14,8 @@ switch flag1st
         line=0;
     case '0'
         
-        y_lim=[-1 1];
+        %y_lim=[-1 1];
+        y_lim=[-6 6];
         %y_lim=[-2.1 0.1];
         line=0;
     case '1'

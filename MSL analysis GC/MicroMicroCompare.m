@@ -9,12 +9,15 @@ set(gcf,'Position',get(0,'ScreenSize'));
 if flagIntro==0
     x_lim=[0 36];
 else
-    x_lim=[0 37];
+    %x_lim=[0 37];
+    x_lim=[0 29];
 end
 switch flag1st
     case ''
-        y_lim_acum=[-1.5 1.5];
-        y_lim_no_acum=[-0.2 0.2];
+        %y_lim_acum=[-1.5 1.5];
+        y_lim_acum=[-3 3];
+        %y_lim_no_acum=[-0.2 0.2];
+        y_lim_no_acum=[-0.5 0.5]; 
         line=0;
     case '0'
         if nargin ~=11

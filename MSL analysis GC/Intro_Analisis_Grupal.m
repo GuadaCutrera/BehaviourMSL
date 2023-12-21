@@ -1,4 +1,6 @@
 function [Intro_Group, Intro_Task_Group]=Intro_Analisis_Grupal(Path,SUJETOS,Results,titulo)
+Grupo='Grupo_punto';
+Completo='2'; % vacio para grupo completo, 2 para cuando se quitan puntos
 
 iki_visual_group=[];
 speed_visual_group=[];
@@ -21,7 +23,7 @@ for i=1:length(SUJETOS)
    Intro(i).S.MOGS=Intro(i).S.IKI_per_trial(3)-Results(i).S.seq_results.IKI_per_trial(1);
    Intro(i).S.TL=Intro(i).S.IKI_per_trial(1)-Results(i).S.seq_results.IKI_per_trial(1);
    Results_Intro=Intro(i).S; %para guardarlo
-   save([Path SUJETOS(i).S '_results2.mat'],'Results_Intro');
+   save([Path SUJETOS(i).S '_results' Completo '.mat'],'Results_Intro');
    
    iki_visual_group=[iki_visual_group; Intro(i).S.IKI_visual];
    speed_visual_group=[speed_visual_group; Intro(i).S.speed_visual];
@@ -75,7 +77,7 @@ Intro_Group.MicroMOGS_acum_group_std=nanstd(MicroMOGS_acum_group,0,1)/sqrt(N);
 Intro_Group.MicroMONGS_acum_group_mean=nanmean(MicroMONGS_acum_group,1);
 Intro_Group.MicroMONGS_acum_group_std=nanstd(MicroMONGS_acum_group,0,1)/sqrt(N);
 
-save([Path 'Grupo_punto\Intro + Task\Group_Results_Intro2.mat'],'Intro_Group'); %Guarda solo lo de la intro
+save([Path Grupo '\Intro + Task\Group_Results_Intro' Completo '.mat'],'Intro_Group'); %Guarda solo lo de la intro
 close all
 
 %% Lo acoplo a Results y llamo a las funciones de Plot (INTRO + TASK)
@@ -131,10 +133,19 @@ for i=1:length(SUJETOS)
     Intro_Task.MONGS_group=[Intro_Task.MONGS_group;MONGS_group(i) Results(i).S.seq_results.MONGS];
     Intro_Task.TL_group=[Intro_Task.TL_group;TL_group(i) Results(i).S.seq_results.Total_Learning];
     %sumo la intro como primer punto para el acum
-    Intro_Task.MOGS_acum_group=[Intro_Task.MOGS_acum_group;MOGS_group(i) Results(i).S.seq_results.MOGS_acumulativo'+MOGS_group(i)];
-    Intro_Task.MONGS_acum_group=[Intro_Task.MONGS_acum_group;MONGS_group(i) Results(i).S.seq_results.MONGS_acumulativo+MONGS_group(i)];
-    Intro_Task.TL_acum_group=[Intro_Task.TL_acum_group;TL_group(i) Results(i).S.seq_results.Total_Learning_acumulativo+TL_group(i)];
-    
+    if isnan(MOGS_group(i))
+        Intro_Task.MOGS_acum_group=[Intro_Task.MOGS_acum_group;MOGS_group(i) Results(i).S.seq_results.MOGS_acumulativo'+0];
+        Intro_Task.TL_acum_group=[Intro_Task.TL_acum_group;TL_group(i) Results(i).S.seq_results.Total_Learning_acumulativo+0];
+    else 
+        Intro_Task.MOGS_acum_group=[Intro_Task.MOGS_acum_group;MOGS_group(i) Results(i).S.seq_results.MOGS_acumulativo'+MOGS_group(i)];
+        Intro_Task.TL_acum_group=[Intro_Task.TL_acum_group;TL_group(i) Results(i).S.seq_results.Total_Learning_acumulativo+TL_group(i)];
+    end
+    if isnan(MONGS_group(i))
+        Intro_Task.MONGS_acum_group=[Intro_Task.MONGS_acum_group;MONGS_group(i) Results(i).S.seq_results.MONGS_acumulativo+0];
+    else
+        Intro_Task.MONGS_acum_group=[Intro_Task.MONGS_acum_group;MONGS_group(i) Results(i).S.seq_results.MONGS_acumulativo+MONGS_group(i)];
+    end
+
     Results(i).S.seq_results.MicroMOGS=reshape(Results(i).S.seq_results.MicroMOGS',1,[]);
     Results(i).S.seq_results.MicroMONGS=reshape(Results(i).S.seq_results.MicroMONGS',1,[]);
     
@@ -145,9 +156,17 @@ for i=1:length(SUJETOS)
     Intro_Task.MicroMOGS_group=[Intro_Task.MicroMOGS_group;MicroMOGS_group(i,:) Results(i).S.seq_results.MicroMOGS];
     Intro_Task.MicroMONGS_group=[Intro_Task.MicroMONGS_group;MicroMONGS_group(i,:) Results(i).S.seq_results.MicroMONGS];
     %sumo la intro para el acum
-    Intro_Task.MicroMOGS_acum_group=[Intro_Task.MicroMOGS_acum_group;MicroMOGS_acum_group(i,:) Results(i).S.seq_results.MicroMogs_acum+MicroMOGS_acum_group(i,end)];
-    Intro_Task.MicroMONGS_acum_group=[Intro_Task.MicroMONGS_acum_group;MicroMONGS_acum_group(i,:) Results(i).S.seq_results.MicroMongs_acum+MicroMONGS_acum_group(i,end)];
-    
+    if isnan(MicroMOGS_acum_group(i,end))
+        Intro_Task.MicroMOGS_acum_group=[Intro_Task.MicroMOGS_acum_group;MicroMOGS_acum_group(i,:) Results(i).S.seq_results.MicroMogs_acum+0];
+    else
+        Intro_Task.MicroMOGS_acum_group=[Intro_Task.MicroMOGS_acum_group;MicroMOGS_acum_group(i,:) Results(i).S.seq_results.MicroMogs_acum+MicroMOGS_acum_group(i,end)];
+    end
+    if isnan(MicroMONGS_acum_group(i,end))
+        Intro_Task.MicroMONGS_acum_group=[Intro_Task.MicroMONGS_acum_group;MicroMONGS_acum_group(i,:) Results(i).S.seq_results.MicroMongs_acum+0];
+    else
+        Intro_Task.MicroMONGS_acum_group=[Intro_Task.MicroMONGS_acum_group;MicroMONGS_acum_group(i,:) Results(i).S.seq_results.MicroMongs_acum+MicroMONGS_acum_group(i,end)];
+    end
+
     %MICRO MICRO media x bloque
     Intro_Task.MicroMOGS_media_group=[Intro_Task.MicroMOGS_media_group;nanmean(MicroMOGS_group(i,:)) Results(i).S.seq_results.media_MicroMogs];
     Intro_Task.MicroMONGS_media_group=[Intro_Task.MicroMONGS_media_group;nanmean(MicroMONGS_group(i,:)) Results(i).S.seq_results.media_MicroMongs];
@@ -174,13 +193,13 @@ Intro_Task_Group.iki_visual_group_std=nanstd(Intro_Task.iki_group,0,1)/sqrt(N);
 
 %PlotInteractivo(SUJETOS,Intro_Task_Group.Intro_Task,Intro_Task_Group,[Path 'Grupo_punto\Intro + Task\']);
 Visualization_Learning_Grupal(Intro_Task_Group.iki_visual_group_mean,Intro_Task_Group.iki_visual_group_std,'iki',titulo)
-saveas(gcf,[Path 'Grupo_punto\Intro + Task\' 'Learning_Visual2.' 'fig']);
+saveas(gcf,[Path Grupo '\Intro + Task\' 'Learning_Visual' Completo '.' 'fig']);
 
 %speed
 Intro_Task_Group.speed_visual_group_mean=nanmean(Intro_Task.speed_group,1);
 Intro_Task_Group.speed_visual_group_std=nanstd(Intro_Task.speed_group,0,1)/sqrt(N);
 Visualization_Learning_Grupal(Intro_Task_Group.speed_visual_group_mean,Intro_Task_Group.speed_visual_group_std,'speed',titulo)
-saveas(gcf,[Path 'Grupo_punto\Intro + Task\' 'Speed_Visual2.' 'fig']);
+saveas(gcf,[Path Grupo '\Intro + Task\' 'Speed_Visual' Completo '.' 'fig']);
 
 %Micro Gains no acum
 Intro_Task_Group.MOGS_group_mean=nanmean(Intro_Task.MOGS_group,1);
@@ -194,7 +213,7 @@ struct.flag_norm=0;
 struct.flag_filt=0;
 MicroGains_Plot_Grupal(Intro_Task_Group.MOGS_group_mean,Intro_Task_Group.MOGS_group_std,Intro_Task_Group.MONGS_group_mean...
     ,Intro_Task_Group.MONGS_group_std,Intro_Task_Group.TL_group_mean,Intro_Task_Group.TL_group_std,Intro_Task.MOGS_group,Intro_Task.MONGS_group,Intro_Task.TL_group,titulo,struct)
-saveas(gcf,[Path 'Grupo_punto\Intro + Task\' 'Micro_Gains_no_acum2.' 'fig']);
+saveas(gcf,[Path Grupo '\Intro + Task\' 'Micro_Gains_no_acum' Completo '.' 'fig']);
 
 
 %Micro gains acum
@@ -208,7 +227,7 @@ Intro_Task_Group.TL_acum_group_std=nanstd(Intro_Task.TL_acum_group,0,1)/sqrt(N);
 MicroGains_Plot_Grupal(Intro_Task_Group.MOGS_acum_group_mean,Intro_Task_Group.MOGS_acum_group_std,Intro_Task_Group.MONGS_acum_group_mean...
     ,Intro_Task_Group.MONGS_acum_group_std,Intro_Task_Group.TL_acum_group_mean,Intro_Task_Group.TL_acum_group_std,Intro_Task.MOGS_acum_group,...
     Intro_Task.MONGS_acum_group,Intro_Task.TL_acum_group,titulo,struct)
-saveas(gcf,[Path 'Grupo_punto\Intro + Task\' 'Micro_Gains_acum2.' 'fig']);
+saveas(gcf,[Path Grupo '\Intro + Task\' 'Micro_Gains_acum' Completo '.' 'fig']);
 
 % Micro Micro
 Intro_Task_Group.MicroMOGS_group_mean=nanmean(Intro_Task.MicroMOGS_group,1);
@@ -287,5 +306,5 @@ MeanMicroMicroGains_Plot_Grupal(Intro_Task_Group.MicroMONGS_mediana_group_median
     Intro_Task_Group.MicroMOGS_acum_mediana_group_median,Intro_Task_Group.MicroMONGS_acum_mediana_group_median,...
     Intro_Task.MicroMOGS_acum_mediana_group,Intro_Task.MicroMONGS_acum_mediana_group,titulo,struct,'mediana')
 
-save([Path 'Grupo_punto\Intro + Task\Group_Results_Intro_Task2.mat'],'Intro_Task_Group'); %Guarda solo lo de la intro
+save([Path Grupo '\Intro + Task\Group_Results_Intro_Task' Completo '.mat'],'Intro_Task_Group'); %Guarda solo lo de la intro
 

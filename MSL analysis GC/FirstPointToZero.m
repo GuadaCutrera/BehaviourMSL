@@ -19,7 +19,7 @@ function Results = FirstPointToZero(Group_iki_visual,Group_MOGS,Group_MONGS,Grou
     Group_MicroMONGS_acum_mediana,flag_comienzo)
 %flag_comienzo=2; %1= primer punto a 1. 0= primer punto a cero. 2= primer punto a 2.
 
-
+N=size(Group_iki_visual,1); % cantidad de filas = sujetos
 %% VISUAL IKI y speed
 Group_iki_visual_aux=NaN(size(Group_iki_visual));         
 Group_speed_aux=NaN(size(Group_iki_visual));
@@ -52,10 +52,10 @@ end
 
 Results.iki_visual=Group_iki_visual_aux;
 Results.iki_visual_mean=nanmean(Group_iki_visual_aux,1);
-Results.iki_visual_std = nanstd(Group_iki_visual_aux,0,1)/sqrt(16);  
+Results.iki_visual_std = nanstd(Group_iki_visual_aux,0,1)/sqrt(N);  
 Results.speed_visual=Group_speed_aux;
 Results.speed_visual_mean=nanmean(Group_speed_aux,1);
-Results.speed_visual_std = nanstd(Group_speed_aux,0,1)/sqrt(16);    
+Results.speed_visual_std = nanstd(Group_speed_aux,0,1)/sqrt(N);    
 
 %% Ganancias (Acum y no acum)
 
@@ -132,9 +132,9 @@ Results.MOGS_acum_mean=nanmean(Group_MOGS_acum_aux,1);
 Results.MONGS_acum_mean=nanmean(Group_MONGS_acum_aux,1);
 Results.TL_acum_mean=nanmean(Group_TL_acum_aux,1);
 
-Results.MOGS_acum_std=nanstd(Group_MOGS_acum_aux,0,1)/sqrt(16);
-Results.MONGS_acum_std=nanstd(Group_MONGS_acum_aux,0,1)/sqrt(16);
-Results.TL_acum_std=nanstd(Group_TL_acum_aux,0,1)/sqrt(16);
+Results.MOGS_acum_std=nanstd(Group_MOGS_acum_aux,0,1)/sqrt(N);
+Results.MONGS_acum_std=nanstd(Group_MONGS_acum_aux,0,1)/sqrt(N);
+Results.TL_acum_std=nanstd(Group_TL_acum_aux,0,1)/sqrt(N);
 
 % a partir de las ganancias no acumuladas con el primer punto en 0
 MOGS_acum_1st_point=cumsum(Group_MOGS_aux,2,'omitnan'); 
@@ -147,21 +147,21 @@ TL_acum_1st_point(TL_acum_1st_point==0)=NaN;
 Results.MOGS_acum_1st_point_mean=nanmean(MOGS_acum_1st_point,1);
 Results.MONGS_acum_1st_point_mean=nanmean(MONGS_acum_1st_point,1);
 Results.TL_acum_1st_point_mean=nanmean(TL_acum_1st_point,1);
-Results.MOGS_acum_1st_point_std=nanstd(MOGS_acum_1st_point,0,1)/sqrt(16);
-Results.MONGS_acum_1st_point_std=nanstd(MONGS_acum_1st_point,0,1)/sqrt(16);
-Results.TL_acum_1st_point_std=nanstd(TL_acum_1st_point,0,1)/sqrt(16);
+Results.MOGS_acum_1st_point_std=nanstd(MOGS_acum_1st_point,0,1)/sqrt(N);
+Results.MONGS_acum_1st_point_std=nanstd(MONGS_acum_1st_point,0,1)/sqrt(N);
+Results.TL_acum_1st_point_std=nanstd(TL_acum_1st_point,0,1)/sqrt(N);
 
 %% nuevo calculo de ganancias a partir del nuevo learning de cada sujeto. 
-% DAN EL MISMO RESULTADO QUE SIN EL PRIMER PUNTO EN CERO pero el tapping da
-% distinto
+%DAN EL MISMO RESULTADO QUE SIN EL PRIMER PUNTO EN CERO pero el tapping da
+%distinto
 durBlock=1000;
 for j=1:size(Group_speed_aux,1) 
     cont=1;
-    for k=1:durBlock:36*durBlock %36 bloques
+    for k=1:durBlock:37*durBlock %36 bloques
         primero=Group_speed_aux(j,k);       
         ultimo=Group_speed_aux(j,k+durBlock-1);      
         MONGS(j,cont)=-(primero-ultimo);
-       if k+durBlock<36*durBlock
+       if k+durBlock<37*durBlock
                 primero_siguiente_bloque=Group_speed_aux(j,k+durBlock);
                 MOGS(j,cont)=-(ultimo-primero_siguiente_bloque);
                 TL(j,cont)=-(primero-primero_siguiente_bloque);
@@ -185,7 +185,9 @@ TL_acum_tapping=cumsum(TL,2,'omitnan');
 Results.MOGS_acum_tapping_mean=nanmean(MOGS_acum_tapping,1);
 Results.MONGS_acum_tapping_mean=nanmean(MONGS_acum_tapping,1);
 Results.TL_acum_tapping_mean=nanmean(TL_acum_tapping,1);
-
+Results.MOGS_acum_tapping_std=nanstd(MOGS_acum_tapping,0,1)/sqrt(N);
+Results.MONGS_acum_tapping_std=nanstd(MONGS_acum_tapping,0,1)/sqrt(N);
+Results.TL_acum_tapping_std=nanstd(TL_acum_tapping,0,1)/sqrt(N);
 
 %% Ganancias (Acum y no acum) del tapping
 clear Group_MOGS_acum_aux; clear Group_MONGS_acum_aux; clear Group_TL_acum_aux;
@@ -195,7 +197,7 @@ Group_MONGS_acum_aux=NaN(size(MONGS_acum_tapping));
 Group_TL_acum_aux=NaN(size(TL_acum_tapping));
 
 for i=1:size(MOGS_acum_tapping,1)    %porque es el que tiene un bloque más
-    if i<size(MOGS_acum_tapping,1) 
+    %if i<size(MOGS_acum_tapping,1) 
         cont=1;
         while isnan(MOGS_acum_tapping(i,cont))
             cont=cont+1;
@@ -208,7 +210,7 @@ for i=1:size(MOGS_acum_tapping,1)    %porque es el que tiene un bloque más
         end
         Group_TL_acum_aux(i,:)=TL_acum_tapping(i,:)-TL_acum_tapping(i,cont);
        
-    end
+    %end
     
     cont=1;
     while isnan(MONGS_acum_tapping(i,cont))
@@ -225,9 +227,9 @@ Results.MOGS_acum=Group_MOGS_acum_aux;
 Results.MONGS_acum=Group_MONGS_acum_aux;
 Results.TL_acum=Group_TL_acum_aux;
 
-Results.MOGS_acum_tapping_mean_punto=nanmean(Group_MOGS_acum_aux,1);
-Results.MONGS_acum_tapping_mean_punto=nanmean(Group_MONGS_acum_aux,1);
-Results.TL_acum_tapping_mean_punto=nanmean(Group_TL_acum_aux,1);
+Results.MOGS_acum_tapping_mean_1st=nanmean(Group_MOGS_acum_aux,1);
+Results.MONGS_acum_tapping_mean_1st=nanmean(Group_MONGS_acum_aux,1);
+Results.TL_acum_tapping_mean_1st=nanmean(Group_TL_acum_aux,1);
 
 
 %% MICRO MICRO acum y no acum MEDIA POR BLOQUE
@@ -292,11 +294,11 @@ Results.Micro_MOGS_acum_media_median=nanmedian(Group_micro_MOGS_acum_aux,1);
 Results.Micro_MONGS_acum_media_median=nanmedian(Group_micro_MONGS_acum_aux,1);
 
 %std
-Results.Micro_MOGS_media_std=nanstd(Group_micro_MOGS_aux,1)/sqrt(16);
-Results.Micro_MONGS_media_std=nanstd(Group_micro_MONGS_aux,1)/sqrt(16);
+Results.Micro_MOGS_media_std=nanstd(Group_micro_MOGS_aux,1)/sqrt(N);
+Results.Micro_MONGS_media_std=nanstd(Group_micro_MONGS_aux,1)/sqrt(N);
 
-Results.Micro_MOGS_acum_media_std=nanstd(Group_micro_MOGS_acum_aux,1)/sqrt(16);
-Results.Micro_MONGS_acum_media_std=nanstd(Group_micro_MONGS_acum_aux,1)/sqrt(16);
+Results.Micro_MOGS_acum_media_std=nanstd(Group_micro_MOGS_acum_aux,1)/sqrt(N);
+Results.Micro_MONGS_acum_media_std=nanstd(Group_micro_MONGS_acum_aux,1)/sqrt(N);
 
 % acumulo los no acum con el primer punto cambiado
 Micro_MOGS_acum_1st_point=cumsum(Group_micro_MOGS_aux,2,'omitnan');
@@ -307,8 +309,8 @@ Results.Micro_MOGS_acum_media_1st_point_mean=nanmean(Micro_MOGS_acum_1st_point,1
 Results.Micro_MONGS_acum_media_1st_point_mean=nanmean(Micro_MONGS_acum_1st_point,1);
 Results.Micro_MOGS_acum_media_1st_point_median=nanmedian(Micro_MOGS_acum_1st_point,1);
 Results.Micro_MONGS_acum_media_1st_point_median=nanmedian(Micro_MONGS_acum_1st_point,1);
-Results.Micro_MOGS_acum_media_1st_point_std=nanstd(Micro_MOGS_acum_1st_point,0,1)/sqrt(16);
-Results.Micro_MONGS_acum_media_1st_point_std=nanstd(Micro_MONGS_acum_1st_point,0,1)/sqrt(16);
+Results.Micro_MOGS_acum_media_1st_point_std=nanstd(Micro_MOGS_acum_1st_point,0,1)/sqrt(N);
+Results.Micro_MONGS_acum_media_1st_point_std=nanstd(Micro_MONGS_acum_1st_point,0,1)/sqrt(N);
 
 clear Group_micro_MOGS_aux; clear Group_micro_MONGS_aux; clear Group_micro_MOGS_acum_aux; clear Group_micro_MONGS_acum_aux;
 clear Group_micro_MOGS_acum_aux; clear Group_micro_MONGS_acum_aux;
@@ -375,11 +377,11 @@ Results.Micro_MOGS_acum_mediana_median=nanmedian(Group_micro_MOGS_acum_aux,1);
 Results.Micro_MONGS_acum_mediana_median=nanmedian(Group_micro_MONGS_acum_aux,1);
 
 %std
-Results.Micro_MOGS_mediana_std=nanstd(Group_micro_MOGS_aux,1)/sqrt(16);
-Results.Micro_MONGS_mediana_std=nanstd(Group_micro_MONGS_aux,1)/sqrt(16);
+Results.Micro_MOGS_mediana_std=nanstd(Group_micro_MOGS_aux,1)/sqrt(N);
+Results.Micro_MONGS_mediana_std=nanstd(Group_micro_MONGS_aux,1)/sqrt(N);
 
-Results.Micro_MOGS_acum_mediana_std=nanstd(Group_micro_MOGS_acum_aux,1)/sqrt(16);
-Results.Micro_MONGS_acum_mediana_std=nanstd(Group_micro_MONGS_acum_aux,1)/sqrt(16);
+Results.Micro_MOGS_acum_mediana_std=nanstd(Group_micro_MOGS_acum_aux,1)/sqrt(N);
+Results.Micro_MONGS_acum_mediana_std=nanstd(Group_micro_MONGS_acum_aux,1)/sqrt(N);
 
 % acumulo los no acum con el primer punto cambiado
 Micro_MOGS_acum_1st_point=cumsum(Group_micro_MOGS_aux,2,'omitnan');
@@ -390,5 +392,5 @@ Results.Micro_MOGS_acum_mediana_1st_point_mean=nanmean(Micro_MOGS_acum_1st_point
 Results.Micro_MONGS_acum_mediana_1st_point_mean=nanmean(Micro_MONGS_acum_1st_point,1);
 Results.Micro_MOGS_acum_mediana_1st_point_median=nanmedian(Micro_MOGS_acum_1st_point,1);
 Results.Micro_MONGS_acum_mediana_1st_point_median=nanmedian(Micro_MONGS_acum_1st_point,1);
-Results.Micro_MOGS_acum_mediana_1st_point_std=nanstd(Micro_MOGS_acum_1st_point,0,1)/sqrt(16);
-Results.Micro_MONGS_acum_mediana_1st_point_std=nanstd(Micro_MONGS_acum_1st_point,0,1)/sqrt(16);
+Results.Micro_MOGS_acum_mediana_1st_point_std=nanstd(Micro_MOGS_acum_1st_point,0,1)/sqrt(N);
+Results.Micro_MONGS_acum_mediana_1st_point_std=nanstd(Micro_MONGS_acum_1st_point,0,1)/sqrt(N);

@@ -151,12 +151,12 @@ saveas(gcf,[path fname(1:end-4) '_MicroMicroGains_crudo.' 'png']);
 %%%                            FIGURE 6                                 %%%
 %%%             Micro Micro Gains as Filtered and/or Normalized data    %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt ==1
-%     [seq_results.MicroMogs_corr_acum,seq_results.MicroMongs_corr_acum]= MicroMicroGains_Plot_Individual(seq_results.MicroMOGS_corr,seq_results.MicroMONGS_corr,['Micro Micro Gains - ' titulo ],seq_results);
+if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt ==1
+    [seq_results.MicroMogs_corr_acum,seq_results.MicroMongs_corr_acum]= MicroMicroGains_Plot_Individual(seq_results.MicroMOGS_corr,seq_results.MicroMONGS_corr,['Micro Micro Gains - ' titulo ],seq_results);
 
-%     saveas(gcf,[path fname(1:end-4) '_MicroMicroGains_corr.' 'fig']);
-%     saveas(gcf,[path fname(1:end-4) '_MicroMicroGains_corr.' 'png']);
-% end %end if data_corr
+    saveas(gcf,[path fname(1:end-4) '_MicroMicroGains_corr.' 'fig']);
+    saveas(gcf,[path fname(1:end-4) '_MicroMicroGains_corr.' 'png']);
+end %end if data_corr
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -257,6 +257,43 @@ saveas(gcf,[path fname(1:end-4) ['_MicroMicroGains_curdo_Mean' '.'] 'png']);
 
 saveas(gcf,[path fname(1:end-4) ['_MicroMicroGains_crudo_Median' '.'] 'fig']);
 saveas(gcf,[path fname(1:end-4) ['_MicroMicroGains_curdo_Median' '.'] 'png']);
+
+if seq_results(1,1).flag_norm==1 || seq_results(1,1).flag_filt ==1
+    %MOGS NO ACUM
+    seq_results(1,1).media_MicroMogs_corr=NaN(1,size(seq_results.MicroMOGS_corr,1));
+    seq_results(1,1).mediana_MicroMogs_corr=NaN(1,size(seq_results.MicroMOGS_corr,1));
+    seq_results(1,1).std_MicroMogs_corr=NaN(1,size(seq_results.MicroMOGS_corr,1));
+
+    for i=1:size(seq_results.MicroMOGS,1)
+        seq_results(1,1).media_MicroMogs_corr(i)=nanmean(seq_results.MicroMOGS_corr(i,:));
+        seq_results(1,1).mediana_MicroMogs_corr(i)=nanmedian(seq_results.MicroMOGS_corr(i,:));
+        seq_results(1,1).std_MicroMogs_corr(i)=nanstd(seq_results.MicroMOGS_corr(i,:));
+    end
+
+
+    %MONGS NO ACUM
+    seq_results(1,1).media_MicroMongs_corr=NaN(1,size(seq_results.MicroMONGS_corr,1));
+    seq_results(1,1).mediana_MicroMongs_corr=NaN(1,size(seq_results.MicroMONGS_corr,1));
+    seq_results(1,1).std_MicroMongs_corr=NaN(1,size(seq_results.MicroMONGS_corr,1));
+
+    for i=1:size(seq_results.MicroMONGS_corr,1)
+        seq_results(1,1).media_MicroMongs_corr(i)=nanmean(seq_results.MicroMONGS_corr(i,:));
+        seq_results(1,1).mediana_MicroMongs_corr(i)=nanmedian(seq_results.MicroMONGS_corr(i,:));
+        seq_results(1,1).std_MicroMongs_corr(i)=nanstd(seq_results.MicroMONGS_corr(i,:));
+    end
+
+    [seq_results(1,1).media_MicroMogs_corr_acum,seq_results(1,1).media_MicroMongs_corr_acum]=MeanMicroMicro_Gains_Plot_Indivudual(seq_results(1,1).media_MicroMogs_corr,seq_results(1,1).media_MicroMongs_corr,seq_results(1,1).std_MicroMogs_corr,seq_results(1,1).std_MicroMongs_corr,'Mean');
+
+    saveas(gcf,[path fname(1:end-4) ['_MicroMicroGains_corr_Mean' '.'] 'fig']);
+    saveas(gcf,[path fname(1:end-4) ['_MicroMicroGains_corr_Mean' '.'] 'png']);
+
+    %GC 6/9/23
+    [seq_results(1,1).mediana_MicroMogs_corr_acum,seq_results(1,1).mediana_MicroMongs_corr_acum]=MeanMicroMicro_Gains_Plot_Indivudual(seq_results(1,1).mediana_MicroMogs_corr,seq_results(1,1).mediana_MicroMongs_corr,seq_results(1,1).std_MicroMogs,seq_results(1,1).std_MicroMongs_corr,'Median');
+
+    saveas(gcf,[path fname(1:end-4) ['_MicroMicroGains_corr_Median' '.'] 'fig']);
+    saveas(gcf,[path fname(1:end-4) ['_MicroMicroGains_corr_Median' '.'] 'png']);
+    
+end
 
 % MOGS ACUM
 % 
